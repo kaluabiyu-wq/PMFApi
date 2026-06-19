@@ -4,3 +4,19 @@ GET {{PmfApi_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+###
+POST  {{PmfApi_HostAddress}}/api/pharmacies
+x-Pharmacy-User : Kalu
+Accept: application/json
+
+
+###
+POST  {{PmfApi_HostAddress}}/api/pharmacies
+x-Pharmacy-User : Kalu
+Accept: application/json
+
+###
+GET {{PmfApi_HostAddress}}/api/pharmacies/xyz
+x-Pharmacy-User : Kalu
+Accept: application/json

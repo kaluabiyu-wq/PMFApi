@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\tarik\\Desktop\\kalu\\PMF\\PmfApi\\PmfApi.csproj",
+      "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMF\\PhramacyFinder\\PmfApi.csproj",
       "projectName": "PmfApi",
-      "projectPath": "C:\\Users\\tarik\\Desktop\\kalu\\PMF\\PmfApi\\PmfApi.csproj",
+      "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMF\\PhramacyFinder\\PmfApi.csproj",
       "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\tarik\\Desktop\\kalu\\PMF\\PmfApi\\obj\\",
+      "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMF\\PhramacyFinder\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"
