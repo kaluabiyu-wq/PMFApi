@@ -13,8 +13,8 @@ public class PharmaciesController(IPharmaciesService pharmaciesService) : Contro
         var pharmacies = await pharmaciesService.GetAllAsync();
         return Ok(pharmacies);
     }
-    [HttpGet("{id}")]
-
+    
+    [HttpGet("id")]
     public async Task<IActionResult> GetById(string id)
     {
         var pharmacies = await pharmaciesService.GetByIdAsync(id);
@@ -41,7 +41,7 @@ public class PharmaciesController(IPharmaciesService pharmaciesService) : Contro
         nameof(GetById),
         new { id = pharmacies.Id},pharmacies);
     }
-    [HttpDelete("{id}")]
+    [HttpDelete("id")]
     public async Task<IActionResult> Delete(string id)
     {
         var deleted = await pharmaciesService.DeleteAsync(id);

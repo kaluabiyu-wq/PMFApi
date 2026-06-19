@@ -47,7 +47,7 @@ public class PharamaciesSerivce : IPharmaciesService
     DateTime.UtcNow);
        _store[id] = pharmacies;
        _logger.LogInformation(
-        "Created Pharmacies {Name} {LicenceNumber} {PhoneNumber} {Email} {IsVerified} {IsActive} {RelialbilityScore} {FreshnessThreshold} record {PharmaciesId}",
+        "Created Pharmacies {Name} Licenese Number {LicenceNumber} PhoneNumber{PhoneNumber} Email {Email} IsVerified {IsVerified} IsActive {IsActive} ReliablityScore {RelialbilityScore} FreshnessThreshold {FreshnessThreshold} record {PharmaciesId}",
         name,licenceNumber,phoneNumber
    ,email,isVerified,isActive,relialbilityScore,freshnessThreshold,id
        );
