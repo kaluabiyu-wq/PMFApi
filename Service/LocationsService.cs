@@ -1,16 +1,4 @@
-public interface ILocationService
-{
-Task<LocationRecord> CreateAsync(string label,decimal latitude,
-decimal longitude,string subcity,
-string woreda,string city);
-Task<LocationRecord?> GetByIdAsync(string id);
 
-Task<IReadOnlyList<LocationRecord>> GetAllAsync();
-
-Task<bool> DeleteAsync(string id);
-
-
-}
 public class LocationService : ILocationService
 {
   private readonly Dictionary<string, LocationRecord> _store = new ();

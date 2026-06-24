@@ -63,4 +63,5 @@ public class PharmaciesController(IPharmaciesService pharmaciesService) : Contro
     DateTime RegisteredAt
 );
 
+
 }
