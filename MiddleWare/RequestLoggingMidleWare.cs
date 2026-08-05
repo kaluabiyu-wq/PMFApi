@@ -23,19 +23,18 @@ public class RequestLoggingMiddleware
         var method = context.Request.Method;
         var path   = context.Request.Path;
 
-        // Entry log
         _logger.LogInformation(
             "Request  {Method} {Path} [{CorrelationId}]",
             method, path, correlationId);
 
         var stopwatch = Stopwatch.StartNew();
 
-        // Hand control to the rest of the pipeline
+     
         await _next(context);
 
         stopwatch.Stop();
 
-        // Exit log — status code is only reliable AFTER next() returns
+       
         _logger.LogInformation(
             "Response {Method} {Path} {StatusCode} {ElapsedMs}ms [{CorrelationId}]",
             method, path, context.Response.StatusCode,

@@ -17,12 +17,12 @@ x-Pharmacy-User : Kalu
 Accept: application/json
 
 ###
-GET {{PmfApi_HostAddress}}/api/pharmacies/61c716b7
+GET {{PmfApi_HostAddress}}/api/pharmacies/857ca677
 x-Pharmacy-User : Kalu
 Accept: application/json
 
 ###
-DELETE  {{PmfApi_HostAddress}}/api/pharmacies/61c716b7
+DELETE  {{PmfApi_HostAddress}}/api/pharmacies/857ca677
 x-Pharmacy-User : Kalu
 Accept: application/json
 

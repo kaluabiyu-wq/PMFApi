@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMF\\PhramacyFinder\\PmfApi.csproj",
+      "projectUniqueName": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.csproj",
       "projectName": "PmfApi",
-      "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMF\\PhramacyFinder\\PmfApi.csproj",
+      "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.csproj",
       "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMF\\PhramacyFinder\\obj\\",
+      "outputPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -70,7 +70,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

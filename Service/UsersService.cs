@@ -13,12 +13,9 @@ public class UserService : IUserService
     }
 
     public Task<UserRecord> CreateAsync(string fullName,
-    decimal email,
-    decimal password,
-    string roleID,
-    string locationID,
-    bool isActive,
-    bool createdAt)
+    decimal email,decimal password,
+    string roleID,string locationID,
+    bool isActive,bool createdAt)
     {
      var existing = _store.Values
      .FirstOrDefault(

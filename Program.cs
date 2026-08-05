@@ -6,15 +6,20 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services
 .AddAuthentication("Pharmacy")
 .AddScheme<AuthenticationSchemeOptions, PharmacyAuthHandler>("Pharmacy",null);
 
 builder.Services.AddSingleton<IPharmaciesService,PharamaciesSerivce>();
-builder.Services.AddSingleton<IMedicinesService,MedicinesService>();
-builder.Services.AddSingleton<ILocationService,LocationService>();
+builder.Services.AddScoped<IMedicinesService,MedicinesService>();
+builder.Services.AddScoped<ILocationService,LocationService>();
+builder.Services.AddScoped<IPharmaciesScheduleService,PharmaciesScheduleService>();
+builder.Services.AddScoped<IInventoryService,InventoryService>();
+builder.Services.AddScoped<IInventoryHistoryService,InventoryHistoryService>();
+builder.Services.AddScoped<IUserFeedBackService,UserFeedBackService>();
+builder.Services.AddScoped<UserService,UserService>();
+
 
 builder.Host.UseDefaultServiceProvider(Options =>
 {
@@ -28,8 +33,6 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 
-
-// // Configure the HTTP request pipeline.
 
 
 // app.UseHttpsRedirection();
@@ -48,9 +51,7 @@ app.UseAuthorization();
         true,
          true,
         56.5m,
-        5,
-        DateTime.UtcNow,
-        DateTime.UtcNow);
+        5);
         return Results.Ok(pharmacies);
          
     });

@@ -33,9 +33,7 @@ public class PharmaciesController(IPharmaciesService pharmaciesService) : Contro
     request.IsVerified,
     request.IsActive,
      request.ReliablityScore,
-     request.FreshnessThreshold,
-    request. LastinventoryUpdateAt,
-    request.RegisteredAt);
+     request.FreshnessThreshold);
 
     return CreatedAtAction(
         nameof(GetById),

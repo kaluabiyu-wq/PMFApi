@@ -11,9 +11,8 @@ public class PharamaciesSerivce : IPharmaciesService
     }
 
     public Task<PharmaciesRecord> CreateAsync(string name,string licenceNumber,int phoneNumber
-   ,string email,bool isVerified,bool isActive,decimal relialbilityScore, int freshnessThreshold,
-   DateTime lastinventoryUpdateAt,
-    DateTime registeredAt)
+   ,string email,bool isVerified,bool isActive,decimal relialbilityScore, int freshnessThreshold
+   )
     {
         var existing = _store.Values
         .FirstOrDefault(p => p.Name == name && p.LicenceNumber == licenceNumber);
@@ -24,8 +23,8 @@ public class PharamaciesSerivce : IPharmaciesService
               name,licenceNumber,existing.Id);
                return Task.FromResult(existing);
         }
-          var id = Guid.NewGuid().ToString("N")[..8];
 
+          var id = Guid.NewGuid().ToString("N")[..8];
           var pharmacies = new PharmaciesRecord(id,name,licenceNumber,phoneNumber
    ,email,isVerified,isActive,relialbilityScore,freshnessThreshold,
    DateTime.UtcNow,

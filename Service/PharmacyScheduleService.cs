@@ -1,7 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-
-
 public class PharmaciesScheduleService : IPharmaciesScheduleService
 {
     private readonly Dictionary<string, PharmaciesScheduleRecord> _store = new();
