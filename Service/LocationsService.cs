@@ -31,7 +31,7 @@ string woreda,string city)
         _store[id] = location ;
 
         _logger.LogInformation(
-            "Created Location {Label}  {Latitude} {Longitude} {Subcity} {Woreda} {city} record {LoctionId}",label,
+            "Created Location {Label}  {Latitude} {Longitude} {Subcity} {Woreda} {City} record {LoctionId}",label,
             latitude,longitude,subcity,woreda,city,id);
 
          return Task.FromResult(location);
@@ -81,5 +81,5 @@ public record LocationRecord(
     decimal Longitude,
     string Subcity,
     string Woreda,
-    string city
+    string City
 );

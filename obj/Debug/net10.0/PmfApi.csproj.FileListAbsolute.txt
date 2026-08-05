@@ -56,3 +56,9 @@ C:\Users\tarik\Desktop\PMFApi\obj\Debug\net10.0\refint\PmfApi.dll
 C:\Users\tarik\Desktop\PMFApi\obj\Debug\net10.0\PmfApi.pdb
 C:\Users\tarik\Desktop\PMFApi\obj\Debug\net10.0\PmfApi.genruntimeconfig.cache
 C:\Users\tarik\Desktop\PMFApi\obj\Debug\net10.0\ref\PmfApi.dll
+C:\Users\tarik\Desktop\PMFApi\obj\Debug\net10.0\PmfApi.csproj.AssemblyReference.cache
+C:\Users\tarik\Desktop\PMFApi\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\tarik\Desktop\PMFApi\bin\Debug\net10.0\Microsoft.OpenApi.dll
+C:\Users\tarik\Desktop\PMFApi\bin\Debug\net10.0\Scalar.AspNetCore.dll
+C:\Users\tarik\Desktop\PMFApi\obj\Debug\net10.0\PmfApi.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\tarik\Desktop\PMFApi\obj\Debug\net10.0\PmfApi.csproj.Up2Date
