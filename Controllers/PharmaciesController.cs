@@ -52,8 +52,7 @@ public class PharmaciesController(IPharmaciesService pharmaciesService) : Contro
     string Name,string LicenceNumber,
     int PhoneNumber,string Email,
     bool IsVerified,bool IsActive,
-    decimal ReliablityScore,int FreshnessThreshold,
-    DateTime LastinventoryUpdateAt,DateTime RegisteredAt
+    decimal ReliablityScore,int FreshnessThreshold
 );
 
 
