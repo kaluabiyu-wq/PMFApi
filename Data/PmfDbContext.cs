@@ -19,5 +19,12 @@ public class PmfDbContext (DbContextOptions<PmfDbContext> options) :
 
     public DbSet<Role> Roles => Set<Role>();
 
+    public DbSet<PharmaciesSchedule> PharmaciesSchedules => Set<PharmaciesSchedule>();
+
+    public DbSet<InventoryHistory> InventoryHistories => Set<InventoryHistory>();
+
+    public DbSet<UserFeedback> UserFeedbacks => Set<UserFeedback>();
+    
+
 
 }

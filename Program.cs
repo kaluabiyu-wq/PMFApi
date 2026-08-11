@@ -121,13 +121,14 @@ using (var scope = app.Services.CreateScope())
 
          
      
-    
 var inventory = new List<Inventory>
  { 
-  new() { PharmacyId = pharmacies[0].Id, MedicineId = medicines[0].Id, Price = 45m, UserId = user[0].Id },
+  new() { PharmacyId = pharmacies[0].Id, MedicineId = medicines[0].Id, Price = 245m, UserId = user[0].Id },
   new() { PharmacyId = pharmacies[0].Id, MedicineId = medicines[1].Id, Price = 65m, UserId = user[1].Id },
-  new() { PharmacyId = pharmacies[1].Id, MedicineId = medicines[0].Id, Price = 125m, UserId = user[2].Id },
-  new() { PharmacyId = pharmacies[1].Id, MedicineId = medicines[1].Id, Price = 135m, UserId = user[1].Id },
+  new() { PharmacyId = pharmacies[1].Id, MedicineId = medicines[0].Id, Price = 225m, UserId = user[2].Id },
+  new() { PharmacyId = pharmacies[1].Id, MedicineId = medicines[1].Id, Price = 55m, UserId = user[1].Id },
+  new() { PharmacyId = pharmacies[2].Id, MedicineId = medicines[0].Id, Price = 235m, UserId = user[2].Id },
+  new() { PharmacyId = pharmacies[2].Id, MedicineId = medicines[1].Id, Price = 75m, UserId = user[1].Id },
  
  };
 
