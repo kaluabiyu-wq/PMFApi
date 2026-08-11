@@ -24,7 +24,12 @@ public class PmfDbContext (DbContextOptions<PmfDbContext> options) :
     public DbSet<InventoryHistory> InventoryHistories => Set<InventoryHistory>();
 
     public DbSet<UserFeedback> UserFeedbacks => Set<UserFeedback>();
-    
 
+
+     protected override void OnModelCreating(ModelBuilder b)
+    {
+      b.ApplyConfigurationsFromAssembly(typeof(PmfDbContext).Assembly);
+    }
+ 
 
 }
