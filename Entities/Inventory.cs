@@ -14,6 +14,8 @@ public class Inventory
 
      public int UserId {get;set;}
 
+     public string Status {get;set;} = "Fresh";
+
      public DateTime LastUpdatedAt {get;set;} = DateTime.UtcNow;
 
      public Medicine Medicine {get;set;} = null!;

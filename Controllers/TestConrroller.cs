@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PmfApi.Data;
 using PmfApi.Entities;
 
@@ -54,5 +55,58 @@ public class TestController(PmfDbContext context) : ControllerBase
             return BadRequest(new {Message = ex.Message});
         }
 
+    }
+
+   
+    [HttpGet("n-plus-one")]
+    public async Task<IActionResult> DemonstrateNPlusOne(CancellationToken cancellationToken)
+    {
+        Console.WriteLine("\n>>> N+1 DEMO: fetching all pharmacies (query #1)...");
+
+        var pharmacies = await context.Pharmacies
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        var report = new List<object>();
+        var queryCount = 1; 
+
+        foreach (var ph in pharmacies)
+        {
+                 var count = await context.Inventories
+                .AsNoTracking()
+                .CountAsync(i => i.PharmacyId == ph.Id && i.Status == "Fresh", cancellationToken);
+
+            report.Add(new { ph.Name, InStockCount = count });
+        }
+
+     
+        return Ok(report);
+    }
+    [HttpGet("patient-search")]
+    public async Task<IActionResult> Search([FromQuery] string? q, CancellationToken cancellationToken)
+    {
+        var query = context.Medicines.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            query = query.Where(m => m.GenericName.Contains(q) || (m.BrandName != null && m.BrandName.Contains(q)));
+        }
+
+        var results = await query
+            .Select(m => new { m.Id, m.GenericName, m.BrandName, m.Category })
+            .ToListAsync(cancellationToken);
+
+        return Ok(results);
+    }
+
+     [HttpGet("admin/all")]
+    public async Task<IActionResult> AdminSearch(CancellationToken cancellationToken)
+    {
+        var results = await context.Medicines
+            .IgnoreQueryFilters()
+            .Select(m => new { m.Id, m.GenericName, m.BrandName, m.Category, m.IsActive })
+            .ToListAsync(cancellationToken);
+
+        return Ok(results);
     }
 }

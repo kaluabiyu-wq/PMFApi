@@ -46,6 +46,7 @@ public class MedicineController(IMedicinesService medicinesService) : Controller
         return deleted ? NoContent () :NotFound();
     }
     
+    
 
    public record CreateMedicineRequest(
     string Id,string Genericname,string Brandname,
