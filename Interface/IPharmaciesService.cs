@@ -1,14 +1,10 @@
+using PmfApi.Dto;
+using PmfApi.Entities;
+
 public interface IPharmaciesService
 {
-   Task<PharmaciesRecord> CreateAsync(string name,string LicenceNumber,int phoneNumber
-   ,string email,bool isVerified,bool isActive,decimal relialbilityScore, int freshnessThreshold
-  
-   );
+   Task<PharmacyResponse> CreateAsync(PharmacyRequest request,CancellationToken ct);
 
-   Task<PharmaciesRecord?> GetByIdAsync(string id);
-
-   Task<IReadOnlyList<PharmaciesRecord>> GetAllAsync();
-
-   Task<bool> DeleteAsync(string id);
+   Task<PharmacyResponse?> GetBylicenceAsync(string licenceNumber,CancellationToken ct);
 
 }

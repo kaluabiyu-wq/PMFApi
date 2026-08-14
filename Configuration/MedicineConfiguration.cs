@@ -13,7 +13,9 @@ public class MedicinesConfiguration : IEntityTypeConfiguration<Medicine>
     {
         b.HasKey(m => m.Id);
         b.Property(m => m.GenericName).IsRequired().HasMaxLength(200);
+        b.Property(m => m.BrandName).IsRequired().HasMaxLength(200);
         b.HasMany(m => m.Inventories).WithOne( m => m.Medicine)
+        .HasForeignKey(m =>m.MedicineId)
         .OnDelete(DeleteBehavior.Restrict);
 
     }

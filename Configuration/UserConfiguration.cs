@@ -14,6 +14,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         b.HasKey(u=>u.Id);
         b.Property(u=> u.FullName).HasMaxLength(200);
+        b.Property(u=> u.Email).HasMaxLength(200);
+        b.Property(u=> u.Password).HasMaxLength(200);
         b.HasIndex(u=>u.Email).IsUnique();
         
     }

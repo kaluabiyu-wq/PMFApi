@@ -1,82 +1,41 @@
 
-public class InventoryHistoryService : IInventoryHistoryService
+using Microsoft.EntityFrameworkCore;
+using PmfApi.Data;
+using PmfApi.Dto;
+using PmfApi.Entities;
+
+namespace PmfApi.Service;
+public class InventoryHistoryService(PmfDbContext context,ILogger <InventoryHistoryService> logger)
+:IInventoryHistoryService
 {
-  private readonly Dictionary<string, InventoryHistoryRecord> _store = new ();
-
-  private readonly ILogger<InventoryHistoryService> _logger;
-
-  public InventoryHistoryService(ILogger<InventoryHistoryService> logger)
+  public async  Task<InventoryHistoryResponse> CreateAsync(int InventoryId,InventoryHistoryRequest request,CancellationToken ct)
     {
-        _logger = logger;
-    }
-
-    public Task<InventoryHistoryRecord> CreateAsync(string inventoryId,string medicineId,string pharmacyId,decimal oldprice)
-    {
-     var existing = _store.Values
-     .FirstOrDefault(
-            l => l.InventoryId == inventoryId && l.PharmacyId == pharmacyId && l.MedicineId == medicineId);
-     if(existing is not null)
+        var history = new InventoryHistory
         {
-            _logger.LogWarning(
-                "Duplicate Inventory History {InventoryId} {PharmacyId} {MedicineId} already exitst in {InventoryId}",
-                medicineId,pharmacyId,medicineId,existing.Id);
-            return Task.FromResult(existing);
-           
-        }
+          InventoryId = InventoryId,
+          MedicineId = request.MedicineId,
+          PharmacyId = request.PharmacyId,
+          UserId = request.UserId,
+          OldPrice = request.OldPrice,
+          ChangedAt = DateTime.UtcNow
 
-        var id = Guid.NewGuid().ToString("N")[..8];
-        var inventoryhistory = new InventoryHistoryRecord(id,inventoryId,pharmacyId,medicineId,oldprice,DateTime.UtcNow);
-        _store[id] = inventoryhistory ;
+        };
+        context.InventoryHistories.Add(history);
+        await context.SaveChangesAsync(ct);
 
-        _logger.LogInformation(
-            "Created Inventory {InventoryId} {PharmacyId} {MedicineId} {OldPrice}  record {InventoryHistoryId}",
-            inventoryId,medicineId,pharmacyId,oldprice,id);
+        logger.LogInformation("Created Inventory History {InventoryHistoryId}  {InventoryId} {MedicineId} {PharamacyId} {UserId} {OldPrice}",
+            history.Id,history.InventoryId,history.MedicineId,history.PharmacyId,history.UserId,history.OldPrice);
 
-         return Task.FromResult(inventoryhistory);
+        return (await GetByinventoryIdAsync(history.InventoryId,history.Id,ct))!;
+
+        
     }
-
-    public Task<InventoryHistoryRecord?> GetByIdAsync(string id)
-    {
-        _store.TryGetValue(id,out var inventoryhistory);
-        if (inventoryhistory is null)
-        {
-            _logger.LogWarning(
-                "Inventory History {InventoryHistoryId} not found",id
-            );
-        }
-        return Task.FromResult(inventoryhistory);
-    }
-
-
-
-    public Task<IReadOnlyList<InventoryHistoryRecord>> GetAllAsync()
-    {
-        IReadOnlyList<InventoryHistoryRecord> all = _store.Values.ToList();
-        return Task.FromResult(all);
-    }
-
-    public Task<bool> DeleteAsync(string id)
-    {
-        var removed = _store.Remove(id);
-        if(removed)
-        {
-            _logger.LogInformation("Deleted Inventory History {InventoryHistoryId}",id);
-        }
-        else
-        {
-            _logger.LogWarning(
-                "Deleted failed. Inventory History {InventoryHistoryId} not Found",id);
-        }
-        return Task.FromResult(removed);
-    }
+  public Task<InventoryHistoryResponse?> GetByinventoryIdAsync(int InventoryId,int id,CancellationToken ct) =>
+  context.InventoryHistories.AsNoTracking()
+  .Where(h => h.Id == id && h.InventoryId == InventoryId)
+  .Select(h => new InventoryHistoryResponse(
+    h.Id,h.InventoryId, h.MedicineId,
+    h.PharmacyId,h.UserId,h.OldPrice,h.ChangedAt
+  )).FirstOrDefaultAsync(ct);
 
 }
-
-public record InventoryHistoryRecord(
-    string Id,
-    string InventoryId,
-    string MedicineId,
-    string PharmacyId,
-    decimal OldPrice,
-    DateTime ChangedAt
-);

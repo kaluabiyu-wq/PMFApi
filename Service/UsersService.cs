@@ -1,90 +1,44 @@
 
 
+using Microsoft.EntityFrameworkCore;
+using PmfApi.Data;
+using PmfApi.Dto;
+using PmfApi.Entities;
 
-public class UserService : IUserService
+namespace PmfApi.Service;
+public class UserService(PmfDbContext context,ILogger<UserService> logger)
+: IUserService
 {
-  private readonly Dictionary<string, UserRecord> _store = new ();
-
-  private readonly ILogger<UserService> _logger;
-
-  public UserService(ILogger<UserService> logger)
+    
+public async Task<UserResponse> CreateAsync(UserRequest request,CancellationToken ct)
     {
-        _logger = logger;
-    }
-
-    public Task<UserRecord> CreateAsync(string fullName,
-    decimal email,decimal password,
-    string roleID,string locationID,
-    bool isActive,bool createdAt)
-    {
-     var existing = _store.Values
-     .FirstOrDefault(
-            u => u.Email == email && u.Password == password);
-     if(existing is not null)
+         var user = new User
         {
-            _logger.LogWarning(
-                "Duplicate User {FullName} {Email} already exitst in {UserId}",
-                email,password,existing.Id);
-            return Task.FromResult(existing);
-           
-        }
+            FullName = request.FullName,
+            Email = request.Email,
+             Password = request.Password,
+            LocationId = request.LocationId
+            
+        };
+        context.Users.Add(user);
+        await context.SaveChangesAsync(ct);
 
-        var id = Guid.NewGuid().ToString("N")[..8];
-        var user = new UserRecord(id,fullName,email,
-       password, roleID, locationID,isActive,createdAt);
-        _store[id] =  user;
+        logger.LogInformation("Created User {UserId} {FullName} {Email} {Password}",
+            user.Id,user.FullName,user.Email,user.Password);
 
-        _logger.LogInformation(
-            "Created User {FullName} {Email} {Password} {roleID} {locationID} {isActive} {createdAt} record {UserId}",fullName,email,
-       password, roleID, locationID,isActive,createdAt,id);
-
-         return Task.FromResult(user);
+        return (await GetByeEmailAsync(user.Email,ct))!;
     }
-
-    public Task<UserRecord?> GetByIdAsync(string id)
-    {
-        _store.TryGetValue(id,out var User);
-        if (User is null)
-        {
-            _logger.LogWarning(
-                "User {UserId} not found",id
-            );
-        }
-        return Task.FromResult(User);
-    }
+        
+    
 
 
-
-    public Task<IReadOnlyList<UserRecord>> GetAllAsync()
-    {
-        IReadOnlyList<UserRecord> all = _store.Values.ToList();
-        return Task.FromResult(all);
-    }
-
-    public Task<bool> DeleteAsync(string id)
-    {
-        var removed = _store.Remove(id);
-        if(removed)
-        {
-            _logger.LogInformation("Deleted User {UserId}",id);
-        }
-        else
-        {
-            _logger.LogWarning(
-                "Deleted failed. User {UserId} not Found",id);
-        }
-        return Task.FromResult(removed);
-    }
+public Task<UserResponse?> GetByeEmailAsync(string email, CancellationToken ct) =>
+       context.Users.AsNoTracking()
+       .Where(u => u.Email == email)
+       .Select( u=>  new UserResponse(
+        u.Id,u.FullName,u.Email,u.Password,
+        u.LocationId,u.IsActive,u.RoleId
+      ,u.CreatedAt)).FirstOrDefaultAsync(ct);
 
 }
 
-public record UserRecord(
-    string Id,
-    string FullName,
-    decimal Email,
-    decimal Password,
-    string RoleID,
-    string LocationID,
-    bool IsActive,
-    bool CreatedAt
-);
