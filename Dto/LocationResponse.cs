@@ -8,7 +8,7 @@ public record LocationResponse
     int Id,
     string Label,
     string Subcity,
-    string? Woreda,
+    string Woreda,
     Coordinate Coordinate
 
 );

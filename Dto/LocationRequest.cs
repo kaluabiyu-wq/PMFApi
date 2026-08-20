@@ -11,5 +11,5 @@ public record LocationRequest
     public required string Subcity {get;init;}
 
      public Coordinate Coordinate {get;init;} = new();
-    public string? Woreda {get;init;}
+    public required string Woreda {get;init;}
 }
