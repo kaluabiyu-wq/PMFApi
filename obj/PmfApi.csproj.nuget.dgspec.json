@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\tarik\\Desktop\\kalu\\pmf2\\PMFApi\\PmfApi.csproj": {}
+    "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\tarik\\Desktop\\kalu\\pmf2\\PMFApi\\PmfApi.csproj": {
+    "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\kalu\\pmf2\\PMFApi\\PmfApi.csproj",
+        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.csproj",
         "projectName": "PmfApi",
-        "projectPath": "C:\\Users\\tarik\\Desktop\\kalu\\pmf2\\PMFApi\\PmfApi.csproj",
+        "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.csproj",
         "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\tarik\\Desktop\\kalu\\pmf2\\PMFApi\\obj\\",
+        "outputPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"

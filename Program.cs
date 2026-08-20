@@ -31,6 +31,7 @@ builder.Services.AddScoped<IInventoryHistoryService,InventoryHistoryService>();
 builder.Services.AddScoped<IUserFeedBackService,UserFeedBackService>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<IRoleService,RoleService>();
+builder.Services.AddScoped<ISearchService,SearchService>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
