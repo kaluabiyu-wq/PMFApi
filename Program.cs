@@ -29,7 +29,8 @@ builder.Services.AddScoped<IPharmaciesScheduleService,PharmaciesScheduleService>
 builder.Services.AddScoped<IInventoryService,InventoryService>();
 builder.Services.AddScoped<IInventoryHistoryService,InventoryHistoryService>();
 builder.Services.AddScoped<IUserFeedBackService,UserFeedBackService>();
-builder.Services.AddScoped<UserService,UserService>();
+builder.Services.AddScoped<IUserService,UserService>();
+builder.Services.AddScoped<IRoleService,RoleService>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();

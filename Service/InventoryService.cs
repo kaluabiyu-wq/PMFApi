@@ -23,7 +23,9 @@ IInventoryService
         var inventory = new Inventory
         {
             PharmacyId = pharmacyId,
-            MedicineId = pharmacyId,
+            MedicineId = medicineId,
+            Price = request.Price,
+            Status = request.Status,
             UserId = request.UserId,
             LastUpdatedAt = DateTime.UtcNow
         };

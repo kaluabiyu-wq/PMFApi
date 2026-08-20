@@ -5,7 +5,7 @@ using PmfApi.Interface;
 namespace PmfApi.Controllers;
 
 [ApiController]
-[Route("api/inventory")]
+[Route("api/pharmacies/{pharmacyId:int}/medicines/{medicineId:int}/inventory")]
 public class InventoryController(IInventoryService inventoryService) : ControllerBase
 {
   
@@ -21,7 +21,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
     public async Task<IActionResult> Create(int pharmacyId, int medicineId,InventoryRequest request, CancellationToken ct)
     {
         var result = await inventoryService.CreateAsync(pharmacyId,medicineId,request, ct);
-        return CreatedAtAction(nameof(GetInventoryById ), new { id = result.Id }, result);
+        return CreatedAtAction(nameof(GetInventoryById ), new { pharmacyId,medicineId,id = result.Id }, result);
     }
 
     

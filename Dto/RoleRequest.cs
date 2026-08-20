@@ -1,7 +1,7 @@
 
 namespace PmfApi.Dto;
 
-public record Role
+public record RoleRequest
 {
     public required string Name {get;init;}
 

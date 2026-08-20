@@ -14,4 +14,6 @@ public record InventoryRequest
     [Range(1, 1_000_000, ErrorMessage = "Price must be greater than one.")]
     public decimal Price {get;init;}
 
+    public string  Status {get;init;} = "Fresh";
+
 }
