@@ -1,18 +1,20 @@
 
 
+using System.ComponentModel.DataAnnotations;
+
 namespace PmfApi.Dto;
 
 public record MedicineRequest
 {
-    public required string GenericName {get;set;}
+    [Required, MaxLength(200)]
+    public required string GenericName {get;init;}
 
-    public required string BrandName {get;set;}
+    [Required, MaxLength(200)]
+    public required string BrandName {get;init;}
 
-    public string? Category {get;set;}
-    public string? DosageForm {get;set;}
 
-    public bool RequeiresPresciption {get;set;} = true;
+    public bool RequeiresPresciption {get;init;} = true;
 
-    public bool IsActice {get;set;} = true;
+    public bool IsActice {get;init;} = true;
 
 }

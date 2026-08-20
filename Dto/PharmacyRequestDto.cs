@@ -1,20 +1,29 @@
 
+using System.ComponentModel.DataAnnotations;
+
 namespace PmfApi.Dto;
 
 public record PharmacyRequest
 {
-    public required string Name {get;set;}
+    [Required, MaxLength(200)]
+    public required string Name {get;init;}
 
-    public required string LicenseNumber {get;set;}
 
-    public required int LocationId {get;set;}
+    [Required, MaxLength(30)]
+    public required string LicenseNumber {get;init;}
 
-    public int PhoneNumber {get;set;}
+    
+    public required int LocationId {get;init;}
 
-    public string? Email {get;set;}
+    [Range(100000000, 999999999, ErrorMessage = "PhoneNumber must be a 9-digit number.")]
+    public int PhoneNumber {get;init;}
 
-    public bool IsVerified {get;set;} = true;
 
-    public int FreshnessThreshold {get;set;}
+    public string? Email {get;init;}
+
+    public bool IsVerified {get;init;} = true;
+
+     [Range(0,100, ErrorMessage = "FreshnessThreshold is Measured in hours (0-100).")]
+    public int FreshnessThreshold {get;init;}
 
 }

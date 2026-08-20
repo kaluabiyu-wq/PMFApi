@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PmfApi.Data;
@@ -11,9 +12,11 @@ using PmfApi.Data;
 namespace PmfApi.Migrations
 {
     [DbContext(typeof(PmfDbContext))]
-    partial class PmfDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260819195844_AddSearch")]
+    partial class AddSearch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -123,6 +126,12 @@ namespace PmfApi.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<decimal>("Latitude")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Longitude")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("Subcity")
                         .IsRequired()
                         .HasColumnType("text");
@@ -132,6 +141,9 @@ namespace PmfApi.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Latitude", "Longitude")
+                        .IsUnique();
 
                     b.ToTable("Locations");
                 });
@@ -287,10 +299,6 @@ namespace PmfApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("MedicineSearch")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("ResultCount")
                         .HasColumnType("integer");
 
@@ -305,6 +313,10 @@ namespace PmfApi.Migrations
 
                     b.Property<decimal>("UserLongitude")
                         .HasColumnType("numeric");
+
+                    b.Property<string>("medicineSearch")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -455,36 +467,6 @@ namespace PmfApi.Migrations
                     b.Navigation("Pharmacy");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("PmfApi.Entities.Location", b =>
-                {
-                    b.OwnsOne("PmfApi.Entities.Coordinate", "Coordinate", b1 =>
-                        {
-                            b1.Property<int>("LocationId")
-                                .HasColumnType("integer");
-
-                            b1.Property<decimal>("Latitude")
-                                .HasColumnType("numeric")
-                                .HasColumnName("Latitude");
-
-                            b1.Property<decimal>("Longitude")
-                                .HasColumnType("numeric")
-                                .HasColumnName("Longitude");
-
-                            b1.HasKey("LocationId");
-
-                            b1.HasIndex("Latitude", "Longitude")
-                                .IsUnique();
-
-                            b1.ToTable("Locations");
-
-                            b1.WithOwner()
-                                .HasForeignKey("LocationId");
-                        });
-
-                    b.Navigation("Coordinate")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("PmfApi.Entities.PharmaciesSchedule", b =>

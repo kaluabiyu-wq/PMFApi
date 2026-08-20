@@ -10,11 +10,11 @@ namespace PmfApi.Service;
 public class LocationService(PmfDbContext context, ILogger<LocationService> logger) :
 ILocationService
 {
-     public Task<LocationResponse?> GetByLongitudAsync(decimal longitude, decimal latitude,CancellationToken ct) =>
+     public Task<LocationResponse?> GetByCoordinateAsync(Coordinate coordinate,CancellationToken ct) =>
      context.Locations.AsNoTracking()
-     .Where(l => l.Latitude == latitude && l.Longitude == longitude)
+     .Where(l => l.Coordinate == coordinate)
      .Select(l => new LocationResponse (
-     l.Id,l.Label,l.Subcity , l.Woreda, l.Longitude,l.Latitude
+     l.Id,l.Label,l.Subcity , l.Woreda, l.Coordinate
      )).FirstOrDefaultAsync(ct);
 
      public async Task<LocationResponse> CreateAsync (LocationRequest request,CancellationToken ct)
@@ -23,18 +23,17 @@ ILocationService
         {
             Label = request.Label,
             Subcity = request.Subcity,
-            Longitude = request.Longitude,
-            Latitude = request.Latitiude,
+            Coordinate = request.Coordinate,
             Woreda = request.Woreda
         };
 
         context.Locations.Add(location);
         await context.SaveChangesAsync(ct);
-        logger.LogInformation(" Location {LocationId} {Label} in {Subcity} subcity with {Longitude} Longitude and{Latitude} Latiude",
-        location.Id,location.Label,location.Subcity,location.Longitude,location.Latitude);
+        logger.LogInformation(" Location {LocationId} {Label} in {Subcity} subcity ",
+        location.Id,location.Label,location.Subcity);
 
 
-        return (await GetByLongitudAsync(location.Longitude,location.Latitude,ct))!;
+        return (await GetByCoordinateAsync(location.Coordinate,ct))!;
     }
 
 

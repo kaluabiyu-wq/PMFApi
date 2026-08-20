@@ -14,8 +14,9 @@ public class MedicinesService(PmfDbContext context, ILogger<MedicinesService> lo
   context.Medicines.AsNoTracking()
   .Where(m => m.Id == id)
   .Select(m => new MedicineResponse (
-    m.Id,m.GenericName,m.BrandName,m.Category,
-    m.DosageForm,m.Strength,m.IsActive,m.RequeiresPrescription
+    m.Id,m.GenericName,m.BrandName,
+    m.Category,m.DosageForm,m.Strength,
+    m.RequeiresPrescription,m.IsActive
   )).FirstOrDefaultAsync(ct);
 
   public async Task<MedicineResponse> CreateAsync(MedicineRequest request,CancellationToken ct)
@@ -24,14 +25,12 @@ public class MedicinesService(PmfDbContext context, ILogger<MedicinesService> lo
         {
             GenericName = request.GenericName,
             BrandName = request.BrandName,
-            IsActive = request.IsActice,
             RequeiresPrescription = request.RequeiresPresciption
         };
         context.Medicines.Add(medicine);
         await context.SaveChangesAsync(ct);
-        logger.LogInformation("Created Medicinies {MedicineId} with {GenericName} and {BrandName} ",
-         medicine.Id,medicine.GenericName,medicine.BrandName
-        );
+        logger.LogInformation("Created Medicinies {MedicineId} with {GenericName}",
+         medicine.Id,medicine.GenericName);
         return (await GetByIdAsync(medicine.Id,ct))!;
     }
 

@@ -1,59 +1,27 @@
-
 using Microsoft.AspNetCore.Mvc;
+using PmfApi.Dto;
+using PmfApi.Interface;
+
+namespace PmfApi.Controllers;
 
 [ApiController]
 [Route("api/pharmacies")]
-
-
 public class PharmaciesController(IPharmaciesService pharmaciesService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var pharmacies = await pharmaciesService.GetAllAsync();
-        return Ok(pharmacies);
-    }
     
-    [HttpGet("id")]
-    public async Task<IActionResult> GetById(string id)
+    [HttpGet("{id}", Name = nameof(GetBylicence))]
+    public async Task<IActionResult> GetBylicence(string id, CancellationToken ct)
     {
-        var pharmacies = await pharmaciesService.GetByIdAsync(id);
-        return pharmacies is not null ? Ok(pharmacies): NotFound();
+        var pharmacy = await pharmaciesService.GetBylicenceAsync(id, ct);
+        return pharmacy is not null ? Ok(pharmacy) : NotFound();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(
-        [FromBody] CreatePharmaciesRequest request)
+    public async Task<IActionResult> Create(PharmacyRequest request, CancellationToken ct)
     {
-        var pharmacies = await pharmaciesService.CreateAsync(
-    request.Name,
-     request.LicenceNumber,
-   request.PhoneNumber,
-    request.Email,
-    request.IsVerified,
-    request.IsActive,
-     request.ReliablityScore,
-     request.FreshnessThreshold);
-
-    return CreatedAtAction(
-        nameof(GetById),
-        new { id = pharmacies.Id},pharmacies);
+        var result = await pharmaciesService.CreateAsync(request, ct);
+        return CreatedAtAction(nameof(GetBylicence), new { id = result.Id }, result);
     }
-    [HttpDelete("id")]
-    public async Task<IActionResult> Delete(string id)
-    {
-        var deleted = await pharmaciesService.DeleteAsync(id);
 
-        return deleted ? NoContent () :NotFound();
-    }
-    
-
-   public record CreatePharmaciesRequest(string Id,
-    string Name,string LicenceNumber,
-    int PhoneNumber,string Email,
-    bool IsVerified,bool IsActive,
-    decimal ReliablityScore,int FreshnessThreshold
-);
-
-
+   
 }

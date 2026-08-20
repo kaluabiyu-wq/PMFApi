@@ -24,7 +24,6 @@ IInventoryService
         {
             PharmacyId = pharmacyId,
             MedicineId = pharmacyId,
-            Status = request.Status,
             UserId = request.UserId,
             LastUpdatedAt = DateTime.UtcNow
         };

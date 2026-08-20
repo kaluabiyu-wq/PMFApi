@@ -1,15 +1,17 @@
 
+using System.ComponentModel.DataAnnotations;
+
 namespace PmfApi.Dto;
 
 public record InventoryRequest
 {
-    public required int MedicineId {get;set;}
+    public required int MedicineId {get;init;}
 
-    public required int PharmacyId {get;set;}
+    public required int PharmacyId {get;init;}
 
-    public int UserId {get;set;}
-    public decimal Price {get;set;}
+    public int UserId {get;init;}
 
-    public string Status {get;set;} = "Fresh";
+    [Range(1, 1_000_000, ErrorMessage = "Price must be greater than one.")]
+    public decimal Price {get;init;}
 
 }

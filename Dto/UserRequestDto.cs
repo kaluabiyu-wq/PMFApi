@@ -3,17 +3,17 @@ namespace PmfApi.Dto;
 
 public record UserRequest
 {
-    public required string FullName {get;set;}
+    public required string FullName {get;init;}
 
-    public required string Email {get;set;}
+    public required string Email {get;init;}
 
-    public required string Password {get;set;}
+    public required string Password {get;init;}
 
-    public required int LocationId {get;set;}
+    public required int LocationId {get;init;}
 
-    public int RoleId {get;set;}
+    public required int RoleId {get;init;}
 
 
-    public bool IsActice {get;set;} = true;
+    public bool IsActice {get;init;} = true;
 
 }

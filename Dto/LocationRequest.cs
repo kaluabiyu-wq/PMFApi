@@ -1,16 +1,15 @@
 
 
+using PmfApi.Entities;
+
 namespace PmfApi.Dto;
 
 public record LocationRequest
 {
-    public required string Label {get;set;}
+    public required string Label {get;init;}
 
-    public required string Subcity {get;set;}
+    public required string Subcity {get;init;}
 
-    public required decimal Latitiude {get;set;}
-
-    public  required decimal Longitude {get;set;}
-
-    public string? Woreda {get;set;}
+     public Coordinate Coordinate {get;init;} = new();
+    public string? Woreda {get;init;}
 }

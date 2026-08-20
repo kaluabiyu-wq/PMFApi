@@ -1,61 +1,28 @@
-
 using Microsoft.AspNetCore.Mvc;
+using PmfApi.Dto;
+using PmfApi.Interface;
+
+namespace PmfApi.Controllers;
 
 [ApiController]
 [Route("api/pharmaciesSchedule")]
-
-
-public class PharmaciesSchedulerController(IPharmaciesScheduleService pharmaciesScheduleService) : ControllerBase
+public class PharmaciesScheduleController(IPharmaciesScheduleService pharmaciesScheduleService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var pharmaciesSchedules = await pharmaciesScheduleService.GetAllAsync();
-        return Ok(pharmaciesSchedules);
-    }
     
-    [HttpGet("id")]
-    public async Task<IActionResult> GetById(string id)
+
+    [HttpGet("{id:int}", Name = nameof(GetByPhramacyId))]
+    public async Task<IActionResult> GetByPhramacyId(int pharmacyId,int id, CancellationToken ct)
     {
-        var pharmaciesSchedules = await pharmaciesScheduleService.GetByIdAsync(id);
-        return pharmaciesSchedules is not null ? Ok(pharmaciesSchedules): NotFound();
+        var pharmacy = await pharmaciesScheduleService.GetByPhramacyIdAsync(pharmacyId, id,ct);
+        return pharmacy is not null ? Ok(pharmacy) : NotFound();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(
-        [FromBody] CreatePharmaciesScheduleRequest request)
+    public async Task<IActionResult> CreateAsync(int pharmacyId,PharmaciesScheduleRequest request, CancellationToken ct)
     {
-        var pharmaciesSchedules = await pharmaciesScheduleService.CreateAsync(
-            request.PharmacyId,
-            request.DayOfWeek,
-            request.OpenTime,
-            request.ClosedTime,
-            request.IsClosed
-       
-   
-   );
-
-    return CreatedAtAction(
-        nameof(GetById),
-        new { id = pharmaciesSchedules.Id},pharmaciesSchedules);
+        var result = await pharmaciesScheduleService.CreateAsync(pharmacyId,request, ct);
+        return CreatedAtAction(nameof(GetByPhramacyId), new { id = result.Id }, result);
     }
-    [HttpDelete("id")]
-    public async Task<IActionResult> Delete(string id)
-    {
-        var deleted = await pharmaciesScheduleService.DeleteAsync(id);
 
-        return deleted ? NoContent () :NotFound();
-    }
-    
-
-   public record CreatePharmaciesScheduleRequest(
-    string  PharmacyId ,
-    int DayOfWeek,
-    DateTime OpenTime,
-    DateTime ClosedTime,
-    bool IsClosed
    
-);
-
-
 }

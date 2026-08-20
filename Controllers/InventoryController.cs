@@ -1,80 +1,28 @@
-
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PmfApi.Data;
-
+using PmfApi.Dto;
+using PmfApi.Interface;
 
 namespace PmfApi.Controllers;
 
 [ApiController]
 [Route("api/inventory")]
-
-
-// public record UpdatePriceRequest(decimal NewPrice);
-
-public class InventoryController(IInventoryService inventoryService,PmfDbContext context) : ControllerBase
+public class InventoryController(IInventoryService inventoryService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var inventories = await inventoryService.GetAllAsync();
-        return Ok(inventories);
-    }
-    
-    [HttpGet("id")]
-    public async Task<IActionResult> GetById(string id)
-    {
-        var inventories = await inventoryService.GetByIdAsync(id);
-        return inventories is not null ? Ok(inventories): NotFound();
-    }
-    //  [HttpPatch("{id:int}/price")]
-    // public async Task<IActionResult> UpdatePrice(int id,[FromBody] UpdatePriceRequest request, CancellationToken cancellationToken)
-    // {
-    //     var item = await context.Inventories.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
-    //     if (item is null) return NotFound();
-    //     item.Price = request.NewPrice;
-    //     item.LastUpdatedAt = DateTime.UtcNow;
+  
 
-    //     try
-    //     {
-    //         await context.SaveChangesAsync(cancellationToken);
-    //         return Ok(new { item.Id, item.Price });
-    //     }
-    //     catch (DbUpdateConcurrencyException)
-    //     {
-    //         return Conflict(new { Message = "This inventory row was modified by someone else. Reload and retry." });
-    //     }
-    // }
+    [HttpGet("{id:int}", Name = nameof(GetInventoryById))]
+    public async Task<IActionResult> GetInventoryById(int pharmacyid,int medicineId,int id, CancellationToken ct)
+    {
+        var inventory = await inventoryService.GetByIdAsync(pharmacyid,medicineId,id, ct);
+        return inventory is not null ? Ok(inventory) : NotFound();
+    }
 
     [HttpPost]
-    public async Task<IActionResult> Create(
-        [FromBody] CreateInventoryRequest request)
+    public async Task<IActionResult> Create(int pharmacyId, int medicineId,InventoryRequest request, CancellationToken ct)
     {
-        var inventories = await inventoryService.CreateAsync(
-            request.PharmacyId,
-            request.MedicineId,
-            request.Price
-   );
-
-    return CreatedAtAction(
-        nameof(GetById),
-        new { id = inventories.Id},inventories);
+        var result = await inventoryService.CreateAsync(pharmacyId,medicineId,request, ct);
+        return CreatedAtAction(nameof(GetInventoryById ), new { id = result.Id }, result);
     }
-    [HttpDelete("id")]
-    public async Task<IActionResult> Delete(string id)
-    {
-        var deleted = await inventoryService.DeleteAsync(id);
 
-        return deleted ? NoContent () :NotFound();
-    }
     
-
-   public record CreateInventoryRequest(
-     string MedicineId,
-    string PharmacyId,
-    decimal Price
-   
-);
-
-
 }

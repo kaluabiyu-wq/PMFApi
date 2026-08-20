@@ -16,8 +16,10 @@ public async Task<UserResponse> CreateAsync(UserRequest request,CancellationToke
         {
             FullName = request.FullName,
             Email = request.Email,
+            RoleId = request.RoleId,
              Password = request.Password,
             LocationId = request.LocationId
+
             
         };
         context.Users.Add(user);
