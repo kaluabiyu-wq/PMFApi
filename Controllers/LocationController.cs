@@ -24,6 +24,12 @@ public class LocationController(ILocationService locationService) : ControllerBa
         var result = await locationService.CreateAsync(request,ct);
         return CreatedAtAction(nameof(GetByCoordinate ), new { id = result.Id }, result);
     }
+    [HttpGet]
+    public async Task<IActionResult> GetLocation([FromQuery] PagedRequest request, CancellationToken ct)
+    {
+        var result = await locationService.GetLocationAsync(request,ct);
+        return Ok(result);
+    }
 
     
 }

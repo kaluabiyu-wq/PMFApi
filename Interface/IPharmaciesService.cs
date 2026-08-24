@@ -7,4 +7,7 @@ public interface IPharmaciesService
 
    Task<PharmacyResponse?> GetBylicenceAsync(string licenceNumber,CancellationToken ct);
 
+
+    Task<PagedResponse<PharmacyResponse>> GetPharmacyAsync(PagedRequest request, CancellationToken ct);
+  
 }

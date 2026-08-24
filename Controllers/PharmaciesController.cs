@@ -22,6 +22,12 @@ public class PharmaciesController(IPharmaciesService pharmaciesService) : Contro
         var result = await pharmaciesService.CreateAsync(request, ct);
         return CreatedAtAction(nameof(GetBylicence), new { id = result.Id }, result);
     }
+      [HttpGet]
+    public async Task<IActionResult> GetLocation([FromQuery] PagedRequest request, CancellationToken ct)
+    {
+        var result = await pharmaciesService.GetPharmacyAsync(request,ct);
+        return Ok(result);
+    }
 
    
 }

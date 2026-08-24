@@ -23,6 +23,6 @@ public class PharmaciesScheduleController(IPharmaciesScheduleService pharmaciesS
         var result = await pharmaciesScheduleService.CreateAsync(pharmacyId,request, ct);
         return CreatedAtAction(nameof(GetByPhramacyId), new { id = result.Id }, result);
     }
-
+    
    
 }

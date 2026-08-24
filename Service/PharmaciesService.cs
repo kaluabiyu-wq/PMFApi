@@ -40,4 +40,50 @@ public class PharamaciesSerivce(PmfDbContext context, ILogger<PharamaciesSerivce
         return (await GetBylicenceAsync(pharmacies.LicenceNumber,ct))!;
     }
 
+
+public async Task<PagedResponse<PharmacyResponse>> GetPharmacyAsync(PagedRequest request, CancellationToken ct)
+{
+    IQueryable<Pharmacy> query = context.Pharmacies.AsNoTracking();
+
+    if (!string.IsNullOrWhiteSpace(request.Search))
+    {
+        query = query.Where(c => EF.Functions.ILike(c.LicenceNumber, $"%{request.Search}%")
+                               || EF.Functions.ILike(c.Name, $"%{request.Search}%"));
+    }
+
+    var totalCount = await query.CountAsync(ct);
+
+    IOrderedQueryable<Pharmacy> sortedQuery = request.OrderBy switch
+    {
+        "Code" => request.Descending
+            ? query.OrderByDescending(c => c.Name)
+            : query.OrderBy(c => c.Name),
+        "MaxCapacity" => request.Descending
+            ? query.OrderByDescending(c => c.LicenceNumber)
+            : query.OrderBy(c => c.LicenceNumber),
+        "ReliabilityScore" => request.Descending
+            ? query.OrderByDescending(c => c.ReliablityScore)
+            : query.OrderBy(c => c.ReliablityScore),
+        _ =>  request.Descending
+            ? query.OrderByDescending(c => c.Email)
+            : query.OrderBy(c => c.Email)
+    };
+
+    var items = await sortedQuery
+        .Skip((request.Page - 1) * request.PageSize)
+        .Take(request.PageSize)
+        .Select(c => new PharmacyResponse(c.Id, c.Name, c.LicenceNumber,
+        c.LocationId,c.IsVerified,c.ReliablityScore,
+        c.FreshnessThreshold,c.LastInventoryUpdateAt,c.RegisteredAt))
+        .ToListAsync(ct);
+
+    return new PagedResponse<PharmacyResponse>
+    {
+        Items = items,
+        TotalCount = totalCount,
+        Page = request.Page,
+        PageSize = request.PageSize
+    };
+}
+
 }

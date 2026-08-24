@@ -28,12 +28,13 @@ public class PharmaciesScheduleService(PmfDbContext context, ILogger<PharmaciesS
     }
         
 
-  public  Task<PharmacyScheduleResponse?> GetByPhramacyIdAsync(int phamrmacyId,int id,CancellationToken ct) =>
-   context.PharmaciesSchedules.AsNoTracking()
+    public  Task<PharmacyScheduleResponse?> GetByPhramacyIdAsync(int phamrmacyId,int id,CancellationToken ct) =>
+    context.PharmaciesSchedules.AsNoTracking()
    .Where(ps => ps.PharmacyId == phamrmacyId && ps.Id == id)
    .Select(ps => new PharmacyScheduleResponse(
     ps.Id,ps.PharmacyId,ps.DayOfWeek,ps.OpenTime,ps.ClosedTime,ps.ISClosed
    )).FirstOrDefaultAsync(ct);
+
 
 
 }

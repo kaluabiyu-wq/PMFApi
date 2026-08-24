@@ -22,6 +22,12 @@ public class MedicineController(IMedicinesService medicinesService) : Controller
         var result = await medicinesService.CreateAsync(request, ct);
         return CreatedAtAction(nameof(GetmedicineById), new { id = result.Id }, result);
     }
+      [HttpGet]
+    public async Task<IActionResult> GetLocation([FromQuery] PagedRequest request, CancellationToken ct)
+    {
+        var result = await medicinesService.GetMedicineAsync(request,ct);
+        return Ok(result);
+    }
 
     
 }

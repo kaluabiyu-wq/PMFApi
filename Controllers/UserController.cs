@@ -26,6 +26,12 @@ public class UserController(IUserService userService) :ControllerBase
         return user is not null ? Ok(user) : NotFound();
  
     }
+      [HttpGet]
+    public async Task<IActionResult> GetLocation([FromQuery] PagedRequest request, CancellationToken ct)
+    {
+        var result = await userService.GetUserAsync(request,ct);
+        return Ok(result);
+    }
 
 }
 

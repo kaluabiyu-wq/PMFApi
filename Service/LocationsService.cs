@@ -40,5 +40,48 @@ ILocationService
 
     return new LocationResponse(location.Id, location.Label, location.Subcity, location.Woreda, location.Coordinate);
 }
-    
+
+public async  Task<PagedResponse<LocationResponse>> GetLocationAsync(PagedRequest request, CancellationToken ct)
+{
+    IQueryable<Location> query = context.Locations.AsNoTracking();
+
+    if (!string.IsNullOrWhiteSpace(request.Search))
+    {
+        query = query.Where(c => EF.Functions.ILike(c.Label, "$%{request.Search}%")
+                               || EF.Functions.ILike(c.Subcity, $"%{request.Search}%"));
+    }
+
+    var totalCount = await query.CountAsync(ct);
+
+    IOrderedQueryable<Location> sortedQuery = request.OrderBy switch
+    {
+        "Label" => request.Descending
+            ? query.OrderByDescending(c => c.Label)
+            : query.OrderBy(c => c.Label),
+        "Subcity" => request.Descending
+            ? query.OrderByDescending(c => c.Subcity)
+            : query.OrderBy(c => c.Subcity),
+        "Coordinate" => request.Descending
+            ? query.OrderByDescending(c => c.Coordinate)
+            : query.OrderBy(c => c.Coordinate),
+        _ =>  request.Descending
+            ? query.OrderByDescending(c => c.Woreda)
+            : query.OrderBy(c => c.Woreda)
+    };
+
+    var items = await sortedQuery
+        .Skip((request.Page - 1) * request.PageSize)
+        .Take(request.PageSize)
+        .Select(l => new LocationResponse(l.Id,
+        l.Label,l.Subcity,l.Woreda,l.Coordinate))
+        .ToListAsync(ct);
+
+    return new PagedResponse<LocationResponse>
+    {
+        Items = items,
+        TotalCount = totalCount,
+        Page = request.Page,
+        PageSize = request.PageSize
+    };
+}
 }

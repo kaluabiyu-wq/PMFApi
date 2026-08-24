@@ -7,5 +7,6 @@ public interface IMedicinesService
 
   Task<MedicineResponse?> GetByIdAsync(int id,CancellationToken ct);
 
+    Task<PagedResponse<MedicineResponse>> GetMedicineAsync(PagedRequest request, CancellationToken ct);
   
 }
