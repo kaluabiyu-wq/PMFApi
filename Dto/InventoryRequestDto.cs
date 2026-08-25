@@ -7,7 +7,7 @@ public record InventoryRequest
 {
     public required int MedicineId {get;init;}
 
-    public int UserId {get;init;}
+    public int UpdatebyUserId {get;init;}
 
     [Range(1, 1_000_000, ErrorMessage = "Price must be greater than one.")]
     public decimal Price {get;init;}

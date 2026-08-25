@@ -12,14 +12,14 @@ public class InventoryService(PmfDbContext context, ILogger<InventoryService> lo
         context.Inventories
             .AsNoTracking()
             .Where(e => e.Id == id)
-            .Select(e => new InventoryResponse(e.Id, e.MedicineId, e.PharmacyId, e.UserId, e.Price, e.Status, e.LastUpdatedAt))
+            .Select(e => new InventoryResponse(e.Id, e.MedicineId, e.PharmacyId, e.UpdatebyUserId, e.Price, e.Status, e.LastUpdatedAt))
             .FirstOrDefaultAsync(ct);
 
     public Task<InventoryResponse?> GetByPharmacyAndMedicineAsync(int pharmacyId, int medicineId, CancellationToken ct) =>
         context.Inventories
             .AsNoTracking()
             .Where(e => e.PharmacyId == pharmacyId && e.MedicineId == medicineId)
-            .Select(e => new InventoryResponse(e.Id, e.MedicineId, e.PharmacyId, e.UserId, e.Price, e.Status, e.LastUpdatedAt))
+            .Select(e => new InventoryResponse(e.Id, e.MedicineId, e.PharmacyId, e.UpdatebyUserId, e.Price, e.Status, e.LastUpdatedAt))
             .FirstOrDefaultAsync(ct);
 
     public async Task<InventoryResponse> CreateAsync(int pharmacyId, InventoryRequest request, CancellationToken ct)
@@ -30,7 +30,7 @@ public class InventoryService(PmfDbContext context, ILogger<InventoryService> lo
             MedicineId = request.MedicineId,
             Price = request.Price,
             Status = request.Status,
-            UserId = request.UserId,
+            UpdatebyUserId = request.UpdatebyUserId,
             LastUpdatedAt = DateTime.UtcNow
         };
 
@@ -66,14 +66,14 @@ public class InventoryService(PmfDbContext context, ILogger<InventoryService> lo
                 ? query.OrderByDescending(c => c.Price)
                 : query.OrderBy(c => c.Price),
             _ => request.Descending
-                ? query.OrderByDescending(c => c.UserId)
-                : query.OrderBy(c => c.UserId)
+                ? query.OrderByDescending(c => c.UpdatebyUserId)
+                : query.OrderBy(c => c.UpdatebyUserId)
         };
 
         var items = await sortedQuery
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(c => new InventoryResponse(c.Id, c.MedicineId, c.PharmacyId, c.UserId, c.Price, c.Status, c.LastUpdatedAt))
+            .Select(c => new InventoryResponse(c.Id, c.MedicineId, c.PharmacyId, c.UpdatebyUserId, c.Price, c.Status, c.LastUpdatedAt))
             .ToListAsync(ct);
 
         return new PagedResponse<InventoryResponse>
