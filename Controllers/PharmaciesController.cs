@@ -10,7 +10,7 @@ public class PharmaciesController(IPharmaciesService pharmaciesService) : Contro
 {
     
     [HttpGet("{id}", Name = nameof(GetBylicence))]
-    public async Task<IActionResult> GetBylicence(string id, CancellationToken ct)
+    public async Task<IActionResult> GetBylicence(int id, CancellationToken ct)
     {
         var pharmacy = await pharmaciesService.GetBylicenceAsync(id, ct);
         return pharmacy is not null ? Ok(pharmacy) : NotFound();
@@ -23,7 +23,7 @@ public class PharmaciesController(IPharmaciesService pharmaciesService) : Contro
         return CreatedAtAction(nameof(GetBylicence), new { id = result.Id }, result);
     }
       [HttpGet]
-    public async Task<IActionResult> GetLocation([FromQuery] PagedRequest request, CancellationToken ct)
+    public async Task<IActionResult> GetPharmacy([FromQuery] PagedRequest request, CancellationToken ct)
     {
         var result = await pharmaciesService.GetPharmacyAsync(request,ct);
         return Ok(result);

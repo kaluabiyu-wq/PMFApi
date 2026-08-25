@@ -11,9 +11,9 @@ namespace PmfApi.Service;
 public class PharamaciesSerivce(PmfDbContext context, ILogger<PharamaciesSerivce> logger)
 : IPharmaciesService
 {
-    public Task<PharmacyResponse?> GetBylicenceAsync(string licenseNumber, CancellationToken ct) =>
+    public Task<PharmacyResponse?> GetBylicenceAsync(int id, CancellationToken ct) =>
     context.Pharmacies.AsNoTracking()
-    .Where(p => p.LicenceNumber == licenseNumber)
+    .Where(p => p.Id == id)
     .Select(p => new PharmacyResponse (
         p.Id,p.Name,p.LicenceNumber,p.LocationId,p.IsVerified,
         p.ReliablityScore,p.FreshnessThreshold,
@@ -37,7 +37,7 @@ public class PharamaciesSerivce(PmfDbContext context, ILogger<PharamaciesSerivce
         logger.LogInformation("Created Pharmacies {PhramacyId} {Name} {LicenceNumber} {LocationId}",
             pharmacies.Id,pharmacies.Name,pharmacies.LicenceNumber,pharmacies.LocationId);
 
-        return (await GetBylicenceAsync(pharmacies.LicenceNumber,ct))!;
+        return (await GetBylicenceAsync(pharmacies.Id,ct))!;
     }
 
 
@@ -55,10 +55,10 @@ public async Task<PagedResponse<PharmacyResponse>> GetPharmacyAsync(PagedRequest
 
     IOrderedQueryable<Pharmacy> sortedQuery = request.OrderBy switch
     {
-        "Code" => request.Descending
+        "Name" => request.Descending
             ? query.OrderByDescending(c => c.Name)
             : query.OrderBy(c => c.Name),
-        "MaxCapacity" => request.Descending
+        "LicenceNumber" => request.Descending
             ? query.OrderByDescending(c => c.LicenceNumber)
             : query.OrderBy(c => c.LicenceNumber),
         "ReliabilityScore" => request.Descending

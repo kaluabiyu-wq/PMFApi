@@ -7,8 +7,6 @@ public record InventoryRequest
 {
     public required int MedicineId {get;init;}
 
-    public required int PharmacyId {get;init;}
-
     public int UserId {get;init;}
 
     [Range(1, 1_000_000, ErrorMessage = "Price must be greater than one.")]
