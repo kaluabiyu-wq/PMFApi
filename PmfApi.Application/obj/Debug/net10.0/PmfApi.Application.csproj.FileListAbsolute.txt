@@ -1,0 +1,16 @@
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\bin\Debug\net10.0\PmfApi.Application.deps.json
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\bin\Debug\net10.0\PmfApi.Application.dll
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\bin\Debug\net10.0\PmfApi.Application.pdb
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\bin\Debug\net10.0\PmfApi.Domain.dll
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\bin\Debug\net10.0\PmfApi.Domain.pdb
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\PmfApi.Application.csproj.AssemblyReference.cache
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\PmfApi.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\PmfApi.Application.AssemblyInfoInputs.cache
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\PmfApi.Application.AssemblyInfo.cs
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\PmfApi.Application.csproj.CoreCompileInputs.cache
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\PmfApi.Application.sourcelink.json
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\PmfApi.A.A566DA3B.Up2Date
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\PmfApi.Application.dll
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\refint\PmfApi.Application.dll
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\PmfApi.Application.pdb
+C:\Users\tarik\Desktop\PMFApi\PmfApi.Application\obj\Debug\net10.0\ref\PmfApi.Application.dll

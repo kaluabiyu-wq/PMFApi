@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="PmfApi.Api/PmfApi.Api.csproj" />
+  <Project Path="PmfApi.Application/PmfApi.Application.csproj" />
+  <Project Path="PmfApi.Domain/PmfApi.Domain.csproj" />
+  <Project Path="PmfApi.Infrastructure/PmfApi.Infrastructure.csproj" />
+</Solution>
+
