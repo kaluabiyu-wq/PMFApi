@@ -11,7 +11,7 @@ namespace PmfApi.Service;
 public class PharamaciesSerivce(PmfDbContext context, ILogger<PharamaciesSerivce> logger)
 : IPharmaciesService
 {
-    public Task<PharmacyResponse?> GetBylicenceAsync(int id, CancellationToken ct) =>
+    public Task<PharmacyResponse?> GetByIdAsync(int id, CancellationToken ct) =>
     context.Pharmacies.AsNoTracking()
     .Where(p => p.Id == id)
     .Select(p => new PharmacyResponse (
@@ -37,7 +37,7 @@ public class PharamaciesSerivce(PmfDbContext context, ILogger<PharamaciesSerivce
         logger.LogInformation("Created Pharmacies {PhramacyId} {Name} {LicenceNumber} {LocationId}",
             pharmacies.Id,pharmacies.Name,pharmacies.LicenceNumber,pharmacies.LocationId);
 
-        return (await GetBylicenceAsync(pharmacies.Id,ct))!;
+        return (await GetByIdAsync(pharmacies.Id,ct))!;
     }
 
 
