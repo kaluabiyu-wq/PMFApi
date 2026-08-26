@@ -33,6 +33,7 @@ builder.Services.AddScoped<IUserFeedBackService,UserFeedBackService>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<IRoleService,RoleService>();
 builder.Services.AddScoped<ISearchService,SearchService>();
+builder.Services.AddScoped<IPharmacyStaffService,PharmacyStaffService>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();

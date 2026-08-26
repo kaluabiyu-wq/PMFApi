@@ -6,7 +6,8 @@ using PmfApi.Domain.Entities;
 
 
 
-namespace PmfApi.Configuration;
+namespace PmfApi.Infrastructure.Persistence.Configuration;
+
 
 public class InventoriesConfiguration : IEntityTypeConfiguration<Inventory>
 {

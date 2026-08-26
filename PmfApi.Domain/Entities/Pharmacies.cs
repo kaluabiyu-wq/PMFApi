@@ -29,6 +29,7 @@ public class Pharmacy
    public int LocationId {get;set;}
 
    public Location Location {get;set;} = null!;
+    public ICollection<PharmacyStaff> PharmacyStaff {get;set;} = new List<PharmacyStaff>();
 
   public ICollection<Inventory> Inventories {get;set;} = new List<Inventory>();
 }

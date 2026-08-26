@@ -2,7 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PmfApi.Domain.Entities;
 
-namespace PmfApi.Configuration;
+namespace PmfApi.Infrastructure.Persistence.Configuration;
+
 
 public class LocationConfiguration : IEntityTypeConfiguration<Location>
 {

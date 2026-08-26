@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PmfApi.Domain.Entities;
 
+namespace PmfApi.Infrastructure.Persistence.Configuration;
 
-namespace PmfApi.Configuration;
 public class MedicinesConfiguration : IEntityTypeConfiguration<Medicine>
 
 {
