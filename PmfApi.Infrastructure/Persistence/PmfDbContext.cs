@@ -22,7 +22,7 @@ public class PmfDbContext (DbContextOptions<PmfDbContext> options) :
     public DbSet<PharmaciesSchedule> PharmaciesSchedules => Set<PharmaciesSchedule>();
     public DbSet<PharmacyStaff> PharmacyStaff => Set<PharmacyStaff>();
 
-
+     public DbSet<PharmacyDocument> PharmacyDocuments => Set<PharmacyDocument>();
 
     public DbSet<InventoryHistory> InventoryHistories => Set<InventoryHistory>();
 
@@ -30,7 +30,7 @@ public class PmfDbContext (DbContextOptions<PmfDbContext> options) :
 
     public DbSet<Search> Searches => Set<Search>();
 
-   
+     public DbSet<Review> Reviews => Set<Review>();
 
      protected override void OnModelCreating(ModelBuilder b)
     {

@@ -30,6 +30,8 @@ public class Pharmacy
 
    public Location Location {get;set;} = null!;
     public ICollection<PharmacyStaff> PharmacyStaff {get;set;} = new List<PharmacyStaff>();
-
+    
+    public ICollection<PharmacyDocument> Documents {get;set;} = new List<PharmacyDocument>();
   public ICollection<Inventory> Inventories {get;set;} = new List<Inventory>();
+    public ICollection<Review> Reviews {get;set;} = new List<Review>();
 }

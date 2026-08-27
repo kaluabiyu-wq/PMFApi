@@ -261,6 +261,49 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
                     b.ToTable("Pharmacies");
                 });
 
+            modelBuilder.Entity("PmfApi.Domain.Entities.PharmacyDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PharmacyId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ReviewStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int?>("ReviewedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PharmacyId");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.ToTable("PharmacyDocuments");
+                });
+
             modelBuilder.Entity("PmfApi.Domain.Entities.PharmacyStaff", b =>
                 {
                     b.Property<int>("Id")
@@ -294,6 +337,42 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("PharmacyStaff");
+                });
+
+            modelBuilder.Entity("PmfApi.Domain.Entities.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("PharmacyId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("PharmacyId", "SubmittedAt");
+
+                    b.ToTable("Reviews", t =>
+                        {
+                            t.HasCheckConstraint("CK_Review_Rating_Range", "\"Rating\" >= 1 AND \"Rating\" <= 5");
+                        });
                 });
 
             modelBuilder.Entity("PmfApi.Domain.Entities.Role", b =>
@@ -546,10 +625,46 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
                     b.Navigation("Location");
                 });
 
+            modelBuilder.Entity("PmfApi.Domain.Entities.PharmacyDocument", b =>
+                {
+                    b.HasOne("PmfApi.Domain.Entities.Pharmacy", "Pharmacy")
+                        .WithMany("Documents")
+                        .HasForeignKey("PharmacyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PmfApi.Domain.Entities.User", "ReviewedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId");
+
+                    b.Navigation("Pharmacy");
+
+                    b.Navigation("ReviewedByUser");
+                });
+
             modelBuilder.Entity("PmfApi.Domain.Entities.PharmacyStaff", b =>
                 {
                     b.HasOne("PmfApi.Domain.Entities.Pharmacy", "Pharmacy")
                         .WithMany("PharmacyStaff")
+                        .HasForeignKey("PharmacyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PmfApi.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pharmacy");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PmfApi.Domain.Entities.Review", b =>
+                {
+                    b.HasOne("PmfApi.Domain.Entities.Pharmacy", "Pharmacy")
+                        .WithMany("Reviews")
                         .HasForeignKey("PharmacyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -620,9 +735,13 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("PmfApi.Domain.Entities.Pharmacy", b =>
                 {
+                    b.Navigation("Documents");
+
                     b.Navigation("Inventories");
 
                     b.Navigation("PharmacyStaff");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("PmfApi.Domain.Entities.Role", b =>
