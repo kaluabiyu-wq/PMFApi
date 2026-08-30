@@ -43,6 +43,14 @@ public Task<UserResponse?> GetByeEmailAsync(string email, CancellationToken ct) 
         u.LocationId,u.IsActive,u.RoleId
       ,u.CreatedAt)).FirstOrDefaultAsync(ct);
 
+      public Task<UserResponse?> GetByIdAsync(int id, CancellationToken ct) =>
+       context.Users.AsNoTracking()
+       .Where(u => u.Id == id)
+       .Select( u=>  new UserResponse(
+        u.Id,u.FullName,u.Email,u.Password,
+        u.LocationId,u.IsActive,u.RoleId
+      ,u.CreatedAt)).FirstOrDefaultAsync(ct);
+
 public async Task<PagedResponse<UserResponse>> GetUserAsync(PagedRequest request, CancellationToken ct)
 {
     IQueryable<User> query = context.Users.AsNoTracking();

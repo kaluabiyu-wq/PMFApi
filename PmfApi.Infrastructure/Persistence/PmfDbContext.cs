@@ -31,6 +31,8 @@ public class PmfDbContext (DbContextOptions<PmfDbContext> options) :
     public DbSet<Search> Searches => Set<Search>();
 
      public DbSet<Review> Reviews => Set<Review>();
+      public DbSet<Favorite> Favorites => Set<Favorite>();
+
 
      protected override void OnModelCreating(ModelBuilder b)
     {

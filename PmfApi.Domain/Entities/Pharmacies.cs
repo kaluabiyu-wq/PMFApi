@@ -34,4 +34,5 @@ public class Pharmacy
     public ICollection<PharmacyDocument> Documents {get;set;} = new List<PharmacyDocument>();
   public ICollection<Inventory> Inventories {get;set;} = new List<Inventory>();
     public ICollection<Review> Reviews {get;set;} = new List<Review>();
+    public ICollection<Favorite> Favorites {get;set;} = new List<Favorite>();
 }

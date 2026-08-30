@@ -36,6 +36,8 @@ builder.Services.AddScoped<ISearchService,SearchService>();
 builder.Services.AddScoped<IPharmacyStaffService,PharmacyStaffService>();
 builder.Services.AddScoped<IPharmacyDocumentService,PharmacyDocumentService>();
 builder.Services.AddScoped<IReviewService,ReviewService>();
+builder.Services.AddScoped<IFavoriteService,FavoriteService>();
+
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
