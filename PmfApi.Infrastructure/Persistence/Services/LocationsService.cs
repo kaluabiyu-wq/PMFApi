@@ -22,7 +22,7 @@ ILocationService
         .FirstOrDefaultAsync(ct);
     public async Task<LocationResponse> CreateAsync(LocationRequest request, CancellationToken ct)
 {
-    var existing = await GetByCoordinateAsync(0, request.Coordinate, ct); // or whatever id makes sense here
+    var existing = await GetByCoordinateAsync(0, request.Coordinate, ct); 
 
     if (existing is not null)
         return existing;

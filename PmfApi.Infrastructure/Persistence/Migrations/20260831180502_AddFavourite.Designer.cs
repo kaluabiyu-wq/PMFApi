@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PmfApi.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using PmfApi.Infrastructure.Persistence;
 namespace PmfApi.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(PmfDbContext))]
-    partial class PmfDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260831180502_AddFavourite")]
+    partial class AddFavourite
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

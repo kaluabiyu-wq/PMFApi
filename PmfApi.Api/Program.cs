@@ -38,6 +38,13 @@ builder.Services.AddScoped<IPharmacyDocumentService,PharmacyDocumentService>();
 builder.Services.AddScoped<IReviewService,ReviewService>();
 builder.Services.AddScoped<IFavoriteService,FavoriteService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
@@ -77,6 +84,7 @@ app.UseStatusCodePages();
 
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseHttpsRedirection();
+app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
 
