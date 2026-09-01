@@ -19,5 +19,8 @@ public class InventoriesConfiguration : IEntityTypeConfiguration<Inventory>
         .HasForeignKey(i => i.MedicineId);
         b.HasOne(i => i.Pharmacy).WithMany(p => p.Inventories)
         .HasForeignKey(i => i.PharmacyId);
+     b.HasOne(i => i.User).WithMany() 
+    .HasForeignKey(i => i.UpdatebyUserId);
+
     }
 }
