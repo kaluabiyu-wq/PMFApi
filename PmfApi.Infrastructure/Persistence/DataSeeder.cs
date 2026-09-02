@@ -118,20 +118,24 @@ public static class DataSeeder
         95m, 100m, 90m, 30m, 55m,  
     ];
 
-    public static async Task SeedAsync(PmfDbContext context,
-     CancellationToken ct = default)
+   public static async Task SeedAsync(
+    PmfDbContext context,
+    CancellationToken ct = default)
+{
+    await context.Database.MigrateAsync(ct);
+
+    // Seed the main/reference data only if the database is empty.
+    if (!await context.Roles.AnyAsync(ct))
     {
-        await context.Database.MigrateAsync(ct);
-
-        if (await context.Roles.AnyAsync(ct))
-        {
-            return;
-        }
-
         foreach (var (name, description) in Roles)
         {
-            context.Roles.Add(new Role { Name = name, Description = description });
+            context.Roles.Add(new Role
+            {
+                Name = name,
+                Description = description
+            });
         }
+
         await context.SaveChangesAsync(ct);
 
         foreach (var (label, subcity, woreda, lat, lng) in Locations)
@@ -141,13 +145,23 @@ public static class DataSeeder
                 Label = label,
                 Subcity = subcity,
                 Woreda = woreda,
-                Coordinate = new Coordinate { Latitude = lat, Longitude = lng }
+                Coordinate = new Coordinate
+                {
+                    Latitude = lat,
+                    Longitude = lng
+                }
             });
         }
+
         await context.SaveChangesAsync(ct);
 
-        foreach (var (genericName, brandName, category,
-         dosageForm, strength, requiresPrescription) in Medicines)
+        foreach (var (
+            genericName,
+            brandName,
+            category,
+            dosageForm,
+            strength,
+            requiresPrescription) in Medicines)
         {
             context.Medicines.Add(new Medicine
             {
@@ -160,13 +174,22 @@ public static class DataSeeder
                 IsActive = true
             });
         }
+
         await context.SaveChangesAsync(ct);
 
-        var locations = await context.Locations.OrderBy(l => l.Id).ToListAsync(ct);
+        var locations = await context.Locations
+            .OrderBy(l => l.Id)
+            .ToListAsync(ct);
 
-        foreach (var (name, licenceNumber, phoneNumber, email,
-         isVerified, reliablityScore, freshnessThreshold, locationIndex)
-          in Pharmacies)
+        foreach (var (
+            name,
+            licenceNumber,
+            phoneNumber,
+            email,
+            isVerified,
+            reliablityScore,
+            freshnessThreshold,
+            locationIndex) in Pharmacies)
         {
             context.Pharmacies.Add(new Pharmacy
             {
@@ -182,9 +205,12 @@ public static class DataSeeder
                 IsActive = true
             });
         }
+
         await context.SaveChangesAsync(ct);
 
-        var pharmacies = await context.Pharmacies.OrderBy(p => p.Id).ToListAsync(ct);
+        var pharmacies = await context.Pharmacies
+            .OrderBy(p => p.Id)
+            .ToListAsync(ct);
 
         foreach (var pharmacy in pharmacies)
         {
@@ -200,11 +226,16 @@ public static class DataSeeder
                 });
             }
         }
+
         await context.SaveChangesAsync(ct);
 
         var roles = await context.Roles.ToListAsync(ct);
 
-        foreach (var (fullName, email, roleName, locationIndex) in Users)
+        foreach (var (
+            fullName,
+            email,
+            roleName,
+            locationIndex) in Users)
         {
             context.Users.Add(new User
             {
@@ -215,38 +246,102 @@ public static class DataSeeder
                 LocationId = locations[locationIndex].Id
             });
         }
-        await context.SaveChangesAsync(ct);
 
-        var medicines = await context.Medicines.OrderBy(m => m.Id).ToListAsync(ct);
-        var pharmacyStaff = await context.Users
-            .Where(u => u.Role.Name == "PharmacyStaff")
-            .OrderBy(u => u.Id)
-            .ToListAsync(ct);
-
-        var random = new Random(42);
-
-        for (var p = 0; p < pharmacies.Count; p++)
-        {
-            var pharmacy = pharmacies[p];
-            var staff = pharmacyStaff[p % pharmacyStaff.Count];
-
-            for (var m = 0; m < medicines.Count; m++)
-            {
-                var daysAgo = random.Next(0, pharmacy.FreshnessThreshold + 15);
-                var lastUpdatedAt = DateTime.UtcNow.AddDays(-daysAgo);
-                var status = daysAgo <= pharmacy.FreshnessThreshold ? "Fresh" : "Stale";
-
-                context.Inventories.Add(new Inventory
-                {
-                    PharmacyId = pharmacy.Id,
-                    MedicineId = medicines[m].Id,
-                    UpdatebyUserId = staff.Id,
-                    Price = BasePrices[m] + (p * 5m),
-                    Status = status,
-                    LastUpdatedAt = lastUpdatedAt
-                });
-            }
-        }
         await context.SaveChangesAsync(ct);
     }
+
+   
+    await SeedInventoriesAsync(context, ct);
+}
+private static async Task SeedInventoriesAsync(
+    PmfDbContext context,
+    CancellationToken ct)
+{
+      if (await context.Inventories.AnyAsync(ct))
+    {
+        return;
+    }
+
+     var medicines = await context.Medicines
+        .OrderBy(m => m.Id)
+        .Take(10)
+        .ToListAsync(ct);
+
+      var pharmacies = await context.Pharmacies
+        .OrderBy(p => p.Id)
+        .Take(5)
+        .ToListAsync(ct);
+
+      var pharmacyStaff = await context.Users
+        .Where(u => u.Role.Name == "PharmacyStaff")
+        .OrderBy(u => u.Id)
+        .ToListAsync(ct);
+
+    if (medicines.Count < 10)
+    {
+        throw new InvalidOperationException(
+            $"Cannot seed inventories because only {medicines.Count} medicines exist. " +
+            "At least 10 medicines are required.");
+    }
+
+    if (pharmacies.Count < 5)
+    {
+        throw new InvalidOperationException(
+            $"Cannot seed inventories because only {pharmacies.Count} pharmacies exist. " +
+            "At least 5 pharmacies are required.");
+    }
+
+    if (pharmacyStaff.Count == 0)
+    {
+        throw new InvalidOperationException(
+            "Cannot seed inventories because no PharmacyStaff users exist.");
+    }
+
+    if (BasePrices.Length < 10)
+    {
+        throw new InvalidOperationException(
+            "At least 10 base prices are required for the 10 medicines.");
+    }
+
+    var random = new Random(42);
+
+    foreach (var (pharmacy, pharmacyIndex) in
+             pharmacies.Select((p, i) => (p, i)))
+    {
+        // Assign a staff member to the pharmacy.
+        var staff = pharmacyStaff[pharmacyIndex % pharmacyStaff.Count];
+
+        foreach (var (medicine, medicineIndex) in
+                 medicines.Select((m, i) => (m, i)))
+        {
+            var daysAgo = random.Next(
+                0,
+                pharmacy.FreshnessThreshold + 15
+            );
+
+            var lastUpdatedAt =
+                DateTime.UtcNow.AddDays(-daysAgo);
+
+            var status =
+                daysAgo <= pharmacy.FreshnessThreshold
+                    ? "Fresh"
+                    : "Stale";
+
+            context.Inventories.Add(new Inventory
+            {
+                PharmacyId = pharmacy.Id,
+                MedicineId = medicine.Id,
+                UpdatebyUserId = staff.Id,
+
+                Price = BasePrices[medicineIndex]
+                        + (pharmacyIndex * 5m),
+
+                Status = status,
+                LastUpdatedAt = lastUpdatedAt
+            });
+        }
+    }
+
+    await context.SaveChangesAsync(ct);
+}
 }

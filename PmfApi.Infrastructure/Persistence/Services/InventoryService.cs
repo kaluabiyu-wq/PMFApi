@@ -103,4 +103,107 @@ public class InventoryService(PmfDbContext context, ILogger<InventoryService> lo
                 i.Status,
                 i.LastUpdatedAt))
             .ToListAsync(ct);
+    public async Task<MedicinePharmacyInventoryResponse?> GetPharmaciesByMedicineAsync(
+    int medicineId,
+    CancellationToken ct)
+{
+    var inventory = await context.Inventories
+        .AsNoTracking()
+        .Where(i => i.MedicineId == medicineId)
+        .OrderBy(i => i.PharmacyId)
+        .Select(i => new
+        {
+            i.MedicineId,
+            i.Medicine.GenericName,
+            i.Medicine.BrandName,
+            i.Medicine.Category,
+            i.Medicine.DosageForm,
+            i.Medicine.Strength,
+            i.Medicine.RequeiresPrescription,
+            i.PharmacyId,
+            i.Price,
+            i.Status,
+            i.LastUpdatedAt
+        })
+        .ToListAsync(ct);
+
+    if (inventory.Count == 0)
+        return null;
+
+    var medicine = inventory.First();
+
+    return new MedicinePharmacyInventoryResponse(
+        medicine.MedicineId,
+        medicine.GenericName,
+        medicine.BrandName,
+        medicine.Category,
+        medicine.DosageForm,
+        medicine.Strength,
+        medicine.RequeiresPrescription,
+        inventory.Select(i => new PharmacyInventoryDetail(
+            i.PharmacyId,
+            i.Price,
+            i.Status,
+            i.LastUpdatedAt
+        )).ToList()
+    );
+}
+
+public async Task<List<MedicinePharmacyInventoryResponse>> 
+    GetAllMedicinesWithPharmaciesAsync(CancellationToken ct)
+{
+    var inventory = await context.Inventories
+        .AsNoTracking()
+        .OrderBy(i => i.Medicine.GenericName)
+        .ThenBy(i => i.PharmacyId)
+        .Select(i => new
+        {
+            MedicineId = i.Medicine.Id,
+            GenericName = i.Medicine.GenericName,
+            BrandName = i.Medicine.BrandName,
+            Category = i.Medicine.Category,
+            DosageForm = i.Medicine.DosageForm,
+            Strength = i.Medicine.Strength,
+
+            // If your entity is still misspelled, use
+            // i.Medicine.RequeiresPrescription
+            RequiresPrescription = i.Medicine.RequeiresPrescription,
+
+            PharmacyId = i.PharmacyId,
+            Price = i.Price,
+            Status = i.Status,
+            LastUpdatedAt = i.LastUpdatedAt
+        })
+        .ToListAsync(ct);
+
+    var result = inventory
+        .GroupBy(i => new
+        {
+            i.MedicineId,
+            i.GenericName,
+            i.BrandName,
+            i.Category,
+            i.DosageForm,
+            i.Strength,
+            i.RequiresPrescription
+        })
+        .Select(group => new MedicinePharmacyInventoryResponse(
+            group.Key.MedicineId,
+            group.Key.GenericName,
+            group.Key.BrandName,
+            group.Key.Category,
+            group.Key.DosageForm,
+            group.Key.Strength,
+            group.Key.RequiresPrescription,
+            group.Select(i => new PharmacyInventoryDetail(
+                i.PharmacyId,
+                i.Price,
+                i.Status,
+                i.LastUpdatedAt
+            )).ToList()
+        ))
+        .ToList();
+
+    return result;
+}
 }

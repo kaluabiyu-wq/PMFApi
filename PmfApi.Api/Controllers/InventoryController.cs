@@ -111,4 +111,56 @@ public class InventoryController(
 
         return await CheckPharmacyExistsAsync(pharmacyId, ct);
     }
+
+    [HttpGet("/api/inventory/medicines/{medicineId:int}/pharmacies",
+    Name = nameof(GetPharmaciesByMedicine))]
+[ProducesResponseType(typeof(MedicinePharmacyInventoryResponse), StatusCodes.Status200OK)]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+[EndpointSummary("Get all pharmacies that stock a medicine")]
+[EndpointDescription(
+    "Returns every pharmacy that has an inventory record for the specified medicine, including price, stock status, and last updated date.")]
+public async Task<IActionResult> GetPharmaciesByMedicine(
+    int medicineId,
+    CancellationToken ct)
+{
+    var medicine = await medicinesService.GetByIdAsync(medicineId, ct);
+
+    if (medicine is null)
+    {
+        return NotFound(new ProblemDetails
+        {
+            Title = "Medicine not found",
+            Detail = $"No medicine exists with id {medicineId}.",
+            Status = StatusCodes.Status404NotFound
+        });
+    }
+
+    var result = await inventoryService.GetPharmaciesByMedicineAsync(
+        medicineId,
+        ct);
+
+    return result is not null
+        ? Ok(result)
+        : NotFound(new ProblemDetails
+        {
+            Title = "No inventory found",
+            Detail = $"No pharmacy has an inventory record for medicine {medicineId}.",
+            Status = StatusCodes.Status404NotFound
+        });
+}
+[HttpGet("/api/inventory/medicines/pharmacies",
+    Name = nameof(GetAllMedicinesWithPharmacies))]
+[ProducesResponseType(
+    typeof(List<MedicinePharmacyInventoryResponse>),
+    StatusCodes.Status200OK)]
+[EndpointSummary("Get all medicines with all pharmacies")]
+[EndpointDescription(
+    "Returns every medicine in inventory together with every pharmacy that has an inventory record for that medicine.")]
+public async Task<IActionResult> GetAllMedicinesWithPharmacies(CancellationToken ct)
+ {
+    var inventory =
+        await inventoryService.GetAllMedicinesWithPharmaciesAsync(ct);
+
+    return Ok(inventory);
+  }
 }
