@@ -124,7 +124,7 @@ public static class DataSeeder
 {
     await context.Database.MigrateAsync(ct);
 
-    // Seed the main/reference data only if the database is empty.
+    
     if (!await context.Roles.AnyAsync(ct))
     {
         foreach (var (name, description) in Roles)
@@ -267,9 +267,18 @@ private static async Task SeedInventoriesAsync(
         .Take(10)
         .ToListAsync(ct);
 
+    // for the second batch of 5 pharmacies
+    var extraMedicines = await context.Medicines
+        .OrderBy(m => m.Id)
+        .Skip(10)
+        .Take(15)
+        .ToListAsync(ct);
+
+    
+
       var pharmacies = await context.Pharmacies
         .OrderBy(p => p.Id)
-        .Take(5)
+        .Take(10)
         .ToListAsync(ct);
 
       var pharmacyStaff = await context.Users
@@ -305,25 +314,24 @@ private static async Task SeedInventoriesAsync(
 
     var random = new Random(42);
 
+    // ── First 5 pharmacies × first 10 medicines 
+    var firstFivePharmacies = pharmacies.Take(5).ToList();
+
     foreach (var (pharmacy, pharmacyIndex) in
-             pharmacies.Select((p, i) => (p, i)))
+             firstFivePharmacies.Select((p, i) => (p, i)))
     {
-        // Assign a staff member to the pharmacy.
         var staff = pharmacyStaff[pharmacyIndex % pharmacyStaff.Count];
 
         foreach (var (medicine, medicineIndex) in
                  medicines.Select((m, i) => (m, i)))
         {
-            var daysAgo = random.Next(
-                0,
-                pharmacy.FreshnessThreshold + 15
+            var daysAgo = random.Next(0,pharmacy.FreshnessThreshold + 15
             );
 
             var lastUpdatedAt =
                 DateTime.UtcNow.AddDays(-daysAgo);
 
-            var status =
-                daysAgo <= pharmacy.FreshnessThreshold
+            var status = daysAgo <= pharmacy.FreshnessThreshold
                     ? "Fresh"
                     : "Stale";
 
@@ -333,9 +341,65 @@ private static async Task SeedInventoriesAsync(
                 MedicineId = medicine.Id,
                 UpdatebyUserId = staff.Id,
 
-                Price = BasePrices[medicineIndex]
-                        + (pharmacyIndex * 5m),
+                Price = BasePrices[medicineIndex] + (pharmacyIndex * 5m),
 
+                Status = status,
+                LastUpdatedAt = lastUpdatedAt
+            });
+        }
+    }
+
+     var nextFivePharmacies = pharmacies.Skip(5).Take(5).ToList();
+
+    // The 2 medicines every pharmacy in this batch has in common
+    var sharedMedicines = medicines.Take(2).ToList();
+
+    foreach (var (pharmacy, pharmacyIndex) in
+             nextFivePharmacies.Select((p, i) => (p, i)))
+    {
+        var staff = pharmacyStaff[(pharmacyIndex + 5) % pharmacyStaff.Count];
+
+        // 2 shared medicines (same across all 5 pharmacies in this batch)
+        foreach (var medicine in sharedMedicines)
+        {
+            var globalMedicineIndex = medicines.IndexOf(medicine);
+
+            var daysAgo = random.Next(0, pharmacy.FreshnessThreshold + 15);
+            var lastUpdatedAt = DateTime.UtcNow.AddDays(-daysAgo);
+            var status = daysAgo <= pharmacy.FreshnessThreshold ? "Fresh" : "Stale";
+
+            context.Inventories.Add(new Inventory
+            {
+                PharmacyId = pharmacy.Id,
+                MedicineId = medicine.Id,
+                UpdatebyUserId = staff.Id,
+                Price = BasePrices[globalMedicineIndex] + (pharmacyIndex * 5m),
+                Status = status,
+                LastUpdatedAt = lastUpdatedAt
+            });
+        }
+
+        // 3 different medicines, unique to this pharmacy
+        // pharmacyIndex 0 -> extraMedicines[0..2], 1 -> [3..5], 2 -> [6..8], ...
+        var uniqueMedicines = extraMedicines
+            .Skip(pharmacyIndex * 3)
+            .Take(3);
+
+        foreach (var medicine in uniqueMedicines)
+        {
+            // index within the full 25-medicine set (10 + position in extraMedicines)
+            var globalMedicineIndex = 10 + extraMedicines.IndexOf(medicine);
+
+            var daysAgo = random.Next(0, pharmacy.FreshnessThreshold + 15);
+            var lastUpdatedAt = DateTime.UtcNow.AddDays(-daysAgo);
+            var status = daysAgo <= pharmacy.FreshnessThreshold ? "Fresh" : "Stale";
+
+            context.Inventories.Add(new Inventory
+            {
+                PharmacyId = pharmacy.Id,
+                MedicineId = medicine.Id,
+                UpdatebyUserId = staff.Id,
+                Price = BasePrices[globalMedicineIndex] + (pharmacyIndex * 5m),
                 Status = status,
                 LastUpdatedAt = lastUpdatedAt
             });
