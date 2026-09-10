@@ -28,6 +28,7 @@ public sealed record PharmacyMedicineDetail(
 
 public sealed record PharmacyInventoryDetail(
     int PharmacyId,
+    string Name,
     decimal Price,
     string Status,
     DateTime LastUpdatedAt

@@ -1,7 +1,6 @@
 namespace PmfApi.Domain.Entities;
 
-// Lets a user's trusted pharmacies get boosted in their own search results.
-// Deliberately separate from Notifications, which is medicine-driven, not pharmacy-driven.
+
 public class Favorite
 {
     public int Id {get;set;}
