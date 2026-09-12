@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj": {}
+    "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj": {
+    "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
+        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
         "projectName": "PmfApi.Api",
-        "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
+        "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
         "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Api\\obj\\",
+        "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -27,14 +27,14 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj": {
-                "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj"
+              "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj": {
+                "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj"
               },
-              "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj": {
-                "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj"
+              "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj": {
+                "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj"
               },
-              "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj": {
-                "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj"
+              "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj": {
+                "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj"
               }
             }
           }
@@ -508,14 +508,14 @@
         }
       }
     },
-    "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj": {
+    "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj",
+        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj",
         "projectName": "PmfApi.Application",
-        "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj",
+        "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj",
         "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Application\\obj\\",
+        "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Application\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -531,8 +531,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj": {
-                "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj"
+              "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj": {
+                "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj"
               }
             }
           }
@@ -847,14 +847,14 @@
         }
       }
     },
-    "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj": {
+    "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj",
         "projectName": "PmfApi.Domain",
-        "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj",
+        "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj",
         "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\obj\\",
+        "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -1182,14 +1182,14 @@
         }
       }
     },
-    "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj": {
+    "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
         "projectName": "PmfApi.Infrastructure",
-        "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
+        "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
         "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\obj\\",
+        "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -1205,11 +1205,11 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj": {
-                "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj"
+              "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj": {
+                "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj"
               },
-              "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj": {
-                "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj"
+              "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj": {
+                "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj"
               }
             }
           }

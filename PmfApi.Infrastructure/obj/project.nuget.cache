@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "WjscnEvFT0k=",
+  "dgSpecHash": "pZ7/+km75Ns=",
   "success": true,
-  "projectFilePath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
+  "projectFilePath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\tarik\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.build.framework\\18.0.2\\microsoft.build.framework.18.0.2.nupkg.sha512",
@@ -40,15 +40,5 @@
     "C:\\Users\\tarik\\.nuget\\packages\\system.composition.runtime\\9.0.0\\system.composition.runtime.9.0.0.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\system.composition.typedparts\\9.0.0\\system.composition.typedparts.9.0.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json.",
-      "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
-      "targetGraphs": []
-    }
-  ]
+  "logs": []
 }

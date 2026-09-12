@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PmfApi.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+21cfe53964e02634978c1a85a7aaec03c92970b4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c840af4e41f1f04580a07ab22db2caffb0f2418d")]
 [assembly: System.Reflection.AssemblyProductAttribute("PmfApi.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PmfApi.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

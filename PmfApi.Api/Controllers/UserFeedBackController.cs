@@ -32,4 +32,13 @@ public class UserFeedBackController(IUserFeedBackService userFeedBackService) : 
         var result = await userFeedBackService.CreateAsync(userId, request, ct);
         return CreatedAtAction(nameof(GetUserFeedbackById), new { userId, inventoryId = result.InventoryId }, result);
     }
+
+    [HttpGet("/api/feedback", Name = nameof(GetAllFeedback))]
+[ProducesResponseType(typeof(PagedResponse<UserFeedBackResponse>), StatusCodes.Status200OK)]
+[EndpointSummary("List all feedback across every user and pharmacy")]
+public async Task<IActionResult> GetAllFeedback([FromQuery] PagedRequest request, CancellationToken ct)
+{
+    var feedback = await userFeedBackService.GetAllAsync(request, ct);
+    return Ok(feedback);
+}
 }

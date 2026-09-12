@@ -10,3 +10,15 @@ C:\Users\tarik\Desktop\PMFApi\PmfApi.Domain\obj\Debug\net10.0\PmfApi.Domain.dll
 C:\Users\tarik\Desktop\PMFApi\PmfApi.Domain\obj\Debug\net10.0\refint\PmfApi.Domain.dll
 C:\Users\tarik\Desktop\PMFApi\PmfApi.Domain\obj\Debug\net10.0\PmfApi.Domain.pdb
 C:\Users\tarik\Desktop\PMFApi\PmfApi.Domain\obj\Debug\net10.0\ref\PmfApi.Domain.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\bin\Debug\net10.0\PmfApi.Domain.deps.json
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\bin\Debug\net10.0\PmfApi.Domain.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\bin\Debug\net10.0\PmfApi.Domain.pdb
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\obj\Debug\net10.0\PmfApi.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\obj\Debug\net10.0\PmfApi.Domain.AssemblyInfoInputs.cache
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\obj\Debug\net10.0\PmfApi.Domain.AssemblyInfo.cs
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\obj\Debug\net10.0\PmfApi.Domain.csproj.CoreCompileInputs.cache
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\obj\Debug\net10.0\PmfApi.Domain.sourcelink.json
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\obj\Debug\net10.0\PmfApi.Domain.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\obj\Debug\net10.0\refint\PmfApi.Domain.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\obj\Debug\net10.0\PmfApi.Domain.pdb
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Domain\obj\Debug\net10.0\ref\PmfApi.Domain.dll

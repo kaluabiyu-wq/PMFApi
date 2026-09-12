@@ -2691,11 +2691,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
+      "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
       "projectName": "PmfApi.Infrastructure",
-      "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
+      "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
       "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Infrastructure\\obj\\",
+      "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -2711,11 +2711,11 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj": {
-              "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj"
+            "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj": {
+              "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Application\\PmfApi.Application.csproj"
             },
-            "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj": {
-              "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj"
+            "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj": {
+              "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj"
             }
           }
         }
@@ -3049,13 +3049,5 @@
         }
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json."
-    }
-  ]
+  }
 }

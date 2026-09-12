@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj",
+      "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj",
       "projectName": "PmfApi.Domain",
-      "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj",
+      "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\PmfApi.Domain.csproj",
       "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.Domain\\obj\\",
+      "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Domain\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"
