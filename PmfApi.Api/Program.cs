@@ -37,6 +37,7 @@ builder.Services.AddScoped<IPharmacyStaffService,PharmacyStaffService>();
 builder.Services.AddScoped<IPharmacyDocumentService,PharmacyDocumentService>();
 builder.Services.AddScoped<IReviewService,ReviewService>();
 builder.Services.AddScoped<IFavoriteService,FavoriteService>();
+builder.Services.AddScoped<IPharmacyAdminService,PharmacyAdminService>();
 
 builder.Services.AddCors(options =>
 {
