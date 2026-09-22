@@ -1,8 +1,25 @@
 {
   "version": 2,
-  "dgSpecHash": "LIxQukjrVrQ=",
+  "dgSpecHash": "CI/UleeNAXk=",
   "success": true,
   "projectFilePath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.csproj",
-  "expectedPackageFiles": [],
-  "logs": []
+  "expectedPackageFiles": [
+    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.10\\microsoft.aspnetcore.openapi.10.0.10.nupkg.sha512",
+    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512",
+    "C:\\Users\\tarik\\.nuget\\packages\\scalar.aspnetcore\\2.16.17\\scalar.aspnetcore.2.16.17.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
+      "projectPath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\tarik\\Desktop\\PMFApi\\PmfApi.csproj",
+      "libraryId": "Microsoft.OpenApi",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

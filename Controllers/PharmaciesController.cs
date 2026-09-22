@@ -49,16 +49,11 @@ public class PharmaciesController(IPharmaciesService pharmaciesService) : Contro
     
 
    public record CreatePharmaciesRequest(string Id,
-    string Name,
-    string LicenceNumber,
-    int PhoneNumber,
-    string Email,
-    bool IsVerified,
-    bool IsActive,
-    decimal ReliablityScore,
-    int FreshnessThreshold,
-    DateTime LastinventoryUpdateAt,
-    DateTime RegisteredAt
+    string Name,string LicenceNumber,
+    int PhoneNumber,string Email,
+    bool IsVerified,bool IsActive,
+    decimal ReliablityScore,int FreshnessThreshold,
+    DateTime LastinventoryUpdateAt,DateTime RegisteredAt
 );
 
 

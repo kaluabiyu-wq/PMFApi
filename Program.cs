@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using Scalar.AspNetCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,35 +13,50 @@ builder.Services
 .AddScheme<AuthenticationSchemeOptions, PharmacyAuthHandler>("Pharmacy",null);
 
 builder.Services.AddSingleton<IPharmaciesService,PharamaciesSerivce>();
-builder.Services.AddScoped<IMedicinesService,MedicinesService>();
-builder.Services.AddScoped<ILocationService,LocationService>();
-builder.Services.AddScoped<IPharmaciesScheduleService,PharmaciesScheduleService>();
-builder.Services.AddScoped<IInventoryService,InventoryService>();
-builder.Services.AddScoped<IInventoryHistoryService,InventoryHistoryService>();
-builder.Services.AddScoped<IUserFeedBackService,UserFeedBackService>();
-builder.Services.AddScoped<UserService,UserService>();
+builder.Services.AddSingleton<IMedicinesService,MedicinesService>();
+builder.Services.AddSingleton<ILocationService,LocationService>();
+builder.Services.AddSingleton<IPharmaciesScheduleService,PharmaciesScheduleService>();
+builder.Services.AddSingleton<IInventoryService,InventoryService>();
+builder.Services.AddSingleton<IInventoryHistoryService,InventoryHistoryService>();
+builder.Services.AddSingleton<IUserFeedBackService,UserFeedBackService>();
+builder.Services.AddSingleton<UserService,UserService>();
 
+builder.Services.AddProblemDetails();
+builder.Services.AddOpenApi();
+builder.Services.AddControllers();
 
-builder.Host.UseDefaultServiceProvider(Options =>
+builder.Host.UseDefaultServiceProvider(options =>
 {
-    Options.ValidateScopes = true;
-    Options.ValidateOnBuild = true;
+    options.ValidateScopes = true;
+    options.ValidateOnBuild = true;
 });
 
 builder.Services.AddAuthorization();
-builder.Services.AddControllers();
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();                 
+    app.MapScalarApiReference();       
+}
+
+else
+{
+    app.UseExceptionHandler();
+}
+
+app.UseStatusCodePages();
 
 
 
-// app.UseHttpsRedirection();
 app.UseMiddleware<RequestLoggingMiddleware>();
-
+ app.UseHttpsRedirection();
 app.UseAuthentication();
-
 app.UseAuthorization();
+
+
+app.MapControllers();
  app.MapPost("/api/pharmacies",async (IPharmaciesService svc) => 
  {
     
@@ -76,6 +92,10 @@ app.MapGet("/api/pharmacies/id",async (string id,IPharmaciesService svc) =>
 
  });
 
-//app.MapControllers();
 
+
+app.MapGet("/api/error", () =>
+{
+    throw new PmfDatabaseException("Simulated database failure for ProblemDetails testing");
+});
 app.Run();
