@@ -14,7 +14,7 @@ public class User
 
     public DateTime CreatedAt {get;set;} = DateTime.UtcNow;
 
-    public int RoleId {get;set;}
+    public  required int RoleId {get;set;}
     public int LocationId {get;set;}
 
     public Role Role {get;set;} = null!;

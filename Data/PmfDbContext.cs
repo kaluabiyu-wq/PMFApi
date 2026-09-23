@@ -25,6 +25,9 @@ public class PmfDbContext (DbContextOptions<PmfDbContext> options) :
 
     public DbSet<UserFeedback> UserFeedbacks => Set<UserFeedback>();
 
+    public DbSet<Search> Searches => Set<Search>();
+
+   
 
      protected override void OnModelCreating(ModelBuilder b)
     {

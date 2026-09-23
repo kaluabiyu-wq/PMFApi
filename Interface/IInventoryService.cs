@@ -11,7 +11,7 @@ public interface IInventoryService
 
   Task<InventoryResponse?> GetByIdAsync(int pharmacyId,int medicineId, int id,CancellationToken ct);
  
-    
+    // Task<PagedResponse<InventoryResponse>> GetinventoryAsync(PagedRequest request, CancellationToken ct);
 
 }
 

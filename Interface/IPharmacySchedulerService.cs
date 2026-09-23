@@ -8,5 +8,7 @@ public interface IPharmaciesScheduleService
    Task<PharmacyScheduleResponse?> GetByPhramacyIdAsync(int phamrmacyId,int id,CancellationToken ct);
 
 
+   //  Task<PagedResponse<PharmacyScheduleResponse>> GetPharmacyscheduleAsync(PagedRequest request, CancellationToken ct);
+  
     
 }

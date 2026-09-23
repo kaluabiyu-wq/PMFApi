@@ -1,61 +1,35 @@
-
 using Microsoft.AspNetCore.Mvc;
+using PmfApi.Dto;
+using PmfApi.Interface;
+using PmfApi.Entities;
+
+namespace PmfApi.Controllers;
 
 [ApiController]
 [Route("api/location")]
-
-
 public class LocationController(ILocationService locationService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
+  
+
+    [HttpGet("{id:int}", Name = nameof(GetByCoordinate))]
+    public async Task<ActionResult<LocationResponse?>> GetByCoordinate(int id, Coordinate coordinate,CancellationToken ct)
     {
-        var location = await locationService.GetAllAsync();
-        return Ok(location);
-    }
-    
-    [HttpGet("id")]
-    public async Task<IActionResult> GetById(string id)
-    {
-        var location = await locationService.GetByIdAsync(id);
-        return location is not null ? Ok(location): NotFound();
+        var location = await locationService.GetByCoordinateAsync(id,coordinate, ct);
+        return location is not null ? Ok(location) : NotFound();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(
-        [FromBody] CreateLocationRequest request)
+    public async Task<IActionResult> CreateAsync(LocationRequest request, CancellationToken ct)
     {
-        var location = await locationService.CreateAsync(
-           request.Label,
-           request.Latitude,
-           request.Longitude,
-           request.Subcity,
-           request.Woreda,
-           request.City
-        
-    );
+        var result = await locationService.CreateAsync(request,ct);
+        return CreatedAtAction(nameof(GetByCoordinate ), new { id = result.Id }, result);
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetLocation([FromQuery] PagedRequest request, CancellationToken ct)
+    {
+        var result = await locationService.GetLocationAsync(request,ct);
+        return Ok(result);
+    }
 
-    return CreatedAtAction(
-        nameof(GetById),
-        new { id = location.Id},location);
-    }
-    [HttpDelete("id")]
-    public async Task<IActionResult> Delete(string id)
-    {
-        var deleted = await locationService.DeleteAsync(id);
-        return deleted ? NoContent () :NotFound();
-    }
     
-
-   public record CreateLocationRequest(
-     string Label,
-    decimal Latitude,
-    decimal Longitude,
-    string Subcity,
-    string Woreda,
-    string City
-   
-);
-
 }
-

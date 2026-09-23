@@ -7,6 +7,6 @@ public interface IUserFeedBackService
 
    Task<UserFeedBackResponse?> GetByUserIdAsync(int userId,int inventoryId,CancellationToken ct);
 
-
+  
    
 }

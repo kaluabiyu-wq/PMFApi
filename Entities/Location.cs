@@ -8,9 +8,7 @@ public class Location
 
     public required string Label {get;set;}
 
-   public decimal Latitude {get;set;}
-
-   public decimal Longitude {get;set;}
+    public Coordinate Coordinate {get;set;} = new();
 
    public required string Subcity {get;set;}  
 
@@ -22,3 +20,4 @@ public class Location
 
 
 }
+

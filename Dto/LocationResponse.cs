@@ -1,4 +1,6 @@
 
+using PmfApi.Entities;
+
 namespace PmfApi.Dto;
 
 public record LocationResponse
@@ -7,7 +9,6 @@ public record LocationResponse
     string Label,
     string Subcity,
     string Woreda,
-    decimal Longitude,
-    decimal Latitude
+    Coordinate Coordinate
 
 );

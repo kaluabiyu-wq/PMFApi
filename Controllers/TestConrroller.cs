@@ -68,8 +68,7 @@ public class TestController(PmfDbContext context) : ControllerBase
             .ToListAsync(cancellationToken);
 
         var report = new List<object>();
-        var queryCount = 1; 
-
+      
         foreach (var ph in pharmacies)
         {
                  var count = await context.Inventories
