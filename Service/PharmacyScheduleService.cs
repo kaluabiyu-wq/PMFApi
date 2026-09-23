@@ -1,82 +1,39 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using PmfApi.Data;
+using PmfApi.Dto;
+using PmfApi.Entities;
 
-public class PharmaciesScheduleService : IPharmaciesScheduleService
+namespace PmfApi.Service;
+public class PharmaciesScheduleService(PmfDbContext context, ILogger<PharmaciesScheduleService> logger)
+: IPharmaciesScheduleService
 {
-    private readonly Dictionary<string, PharmaciesScheduleRecord> _store = new();
-    private readonly ILogger<PharmaciesScheduleService> _logger;
-   public PharmaciesScheduleService(ILogger<PharmaciesScheduleService> logger)
+   public async Task<PharmacyScheduleResponse> CreateAsync(int phamrmacyId,PharmaciesScheduleRequest request,CancellationToken ct)
     {
-       _logger = logger;
-    }
-
-    public Task<PharmaciesScheduleRecord> CreateAsync( 
-    string  pharmacyId ,
-    int dayOfWeek,
-    DateTime openTime,
-    DateTime closedTime,
-    bool isClosed)
-    {
-        var existing = _store.Values
-        .FirstOrDefault(p =>  p.PharmacyId == pharmacyId);
-        if(existing is not null )
+         var schedule = new PharmaciesSchedule
         {
-            _logger.LogWarning(
-            "Duplicate Pharmacies {PharmacyId} schedule already exists (record {PharmaciesScheduleId})",
-            pharmacyId,existing.Id);
-               return Task.FromResult(existing);
-        }
-          var id = Guid.NewGuid().ToString("N")[..8];
+           PharmacyId = phamrmacyId,
+           DayOfWeek = request.DayOfWeek,
+           OpenTime = DateTime.UtcNow,
+           ClosedTime = DateTime.UtcNow,
+            
+        };
+        context.PharmaciesSchedules.Add(schedule);
+        await context.SaveChangesAsync(ct);
 
-          var pharmaciesSchedule = new PharmaciesScheduleRecord(id,pharmacyId , dayOfWeek,
-         openTime, closedTime, isClosed);
-       _store[id] = pharmaciesSchedule;
-       _logger.LogInformation(
- "Created Pharmacies Schedule {PharmacyId} {DayOfWeek} {OpenTime} {ClosedTime} {IsClosed} is record in *({PharmacySchduleId})",
- id,pharmacyId , dayOfWeek,
-         openTime, closedTime, isClosed
-       );
-       return Task.FromResult(pharmaciesSchedule);
-    }
-     
-     public Task<PharmaciesScheduleRecord?> GetByIdAsync(string id)
-    {
-        _store.TryGetValue(id,out var pharmaciesSchedule);
+        logger.LogInformation("Created Pharmacies Schedule {PhramacyScheduleId} for Pharmacy {PharmacyId} with {DayofWeek} {OpenTime} {ClosedTime}",
+            schedule.Id,schedule.PharmacyId,schedule.DayOfWeek,schedule.OpenTime,schedule.ClosedTime);
 
-        if(pharmaciesSchedule is null)
-        {
-            _logger.LogWarning("Pharmacies {PharmacySchduleId} not found",id);
-        }
-        return Task.FromResult(pharmaciesSchedule);
+        return (await GetByPhramacyIdAsync(schedule.PharmacyId,schedule.Id,ct))!;
     }
+        
 
-    public Task<IReadOnlyList<PharmaciesScheduleRecord>> GetAllAsync()
-    {
-        IReadOnlyList<PharmaciesScheduleRecord> all = _store.Values.ToList();
-
-        return Task.FromResult(all);
-    }
-    public Task<bool> DeleteAsync(string id)
-    {
-        var removed = _store.Remove(id);
-        if(removed)
-        {
-            _logger.LogWarning("Deleted Pharmacies {PharmacySchduleId} schedule",id);
-        }
-        else
-        {
-            _logger.LogWarning("Deleted faild. Pharmacies Schedule {PharmacySchduleId}",id);
-        }
-        return Task.FromResult(removed);
-    }
+  public  Task<PharmacyScheduleResponse?> GetByPhramacyIdAsync(int phamrmacyId,int id,CancellationToken ct) =>
+   context.PharmaciesSchedules.AsNoTracking()
+   .Where(ps => ps.PharmacyId == phamrmacyId && ps.Id == id)
+   .Select(ps => new PharmacyScheduleResponse(
+    ps.Id,ps.PharmacyId,ps.DayOfWeek,ps.OpenTime,ps.ClosedTime,ps.ISClosed
+   )).FirstOrDefaultAsync(ct);
 
 
 }
-
-public record PharmaciesScheduleRecord(
-    string Id,
-    string  PharmacyId ,
-    int DayOfWeek,
-    DateTime OpenTime,
-    DateTime ClosedTime,
-    bool IsClosed
-);

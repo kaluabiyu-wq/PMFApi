@@ -15,7 +15,8 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
         b.Property(l => l.Label).IsRequired().HasMaxLength(200);
         b.Property(l => l.City).IsRequired().HasMaxLength(200);
         b.HasIndex(l => new {l.Latitude,l.Longitude}).IsUnique();
-        b.HasMany(l => l.Inventories).WithOne( l => l.Location);
+        b.HasMany(l => l.Inventories).WithOne( l => l.Location)
+        .HasForeignKey(l=>l.LocationId);
 
     }
 

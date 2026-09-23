@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PmfApi.Data;
 using PmfApi.Entities;
+using PmfApi.Interface;
+using PmfApi.Service;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -144,46 +146,6 @@ var inventory = new List<Inventory>
    }
 
 }
-
-
-
-app.MapControllers();
- app.MapPost("/api/pharmacies",async (IPharmaciesService svc) => 
- {
-    
-   var pharmacies =  await svc.CreateAsync("Betezata",
-         "P10025",
-        0920456532,
-        "Betezata@gmail.com",
-        true,
-         true,
-        56.5m,
-        5);
-        return Results.Ok(pharmacies);
-         
-    });
-app.MapGet("/api/pharmacies/id",async (string id,IPharmaciesService svc) => 
- {
-   var pharmacies = await svc.GetByIdAsync(id);
-   return pharmacies is null ? Results.NotFound() : Results.Ok(pharmacies);
-
- });
-
- app.MapGet("/api/pharmacies", async (IPharmaciesService svc)=>
- {
-    var all = await svc.GetAllAsync();
-    return Results.Ok(all);
-     
- });
-
- app.MapDelete("/api/pharmacies/id",async (string id,IPharmaciesService svc) => 
- {
-   var deleted = await svc.DeleteAsync(id);
-   return deleted ? Results.NotFound() : Results.NoContent();
-
- });
-
-
 
 app.MapGet("/api/error", () =>
 {

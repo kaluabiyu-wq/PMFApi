@@ -17,6 +17,7 @@ public class PharmaciesConfiguration : IEntityTypeConfiguration<Pharmacy>
         b.Property(p => p.LicenceNumber).IsRequired().HasMaxLength(100);
         b.HasIndex(p => p.LicenceNumber).IsUnique();
         b.HasMany(p => p.Inventories).WithOne( p => p.Pharmacy)
+        .HasForeignKey(p=>p.PharmacyId)
         .OnDelete(DeleteBehavior.Restrict);
 
     }

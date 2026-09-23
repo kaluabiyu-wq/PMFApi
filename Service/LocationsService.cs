@@ -1,85 +1,43 @@
 
-public class LocationService : ILocationService
+
+using Microsoft.EntityFrameworkCore;
+using PmfApi.Data;
+using PmfApi.Dto;
+using PmfApi.Entities;
+using PmfApi.Interface;
+
+namespace PmfApi.Service;
+public class LocationService(PmfDbContext context, ILogger<LocationService> logger) :
+ILocationService
 {
-  private readonly Dictionary<string, LocationRecord> _store = new ();
+     public Task<LocationResponse?> GetByLongitudAsync(decimal longitude, decimal latitude,CancellationToken ct) =>
+     context.Locations.AsNoTracking()
+     .Where(l => l.Latitude == latitude && l.Longitude == longitude)
+     .Select(l => new LocationResponse (
+     l.Id,l.Label,l.Subcity , l.Woreda, l.Longitude,l.Latitude
+     )).FirstOrDefaultAsync(ct);
 
-  private readonly ILogger<LocationService> _logger;
-
-  public LocationService(ILogger<LocationService> logger)
+     public async Task<LocationResponse> CreateAsync (LocationRequest request,CancellationToken ct)
     {
-        _logger = logger;
-    }
-
-    public Task<LocationRecord> CreateAsync(string label,decimal latitude,
-decimal longitude,string subcity,
-string woreda,string city)
-    {
-     var existing = _store.Values
-     .FirstOrDefault(
-            l => l.Latitude == latitude && l.Longitude == longitude);
-     if(existing is not null)
+        var location = new Location
         {
-            _logger.LogWarning(
-                "Duplicate Location {Longitude} {Latitude} already exitst in {LocationId}",
-                latitude,longitude,existing.Id);
-            return Task.FromResult(existing);
-           
-        }
+            Label = request.Label,
+            Subcity = request.Subcity,
+            Longitude = request.Longitude,
+            Latitude = request.Latitiude,
+            Woreda = request.Woreda
+        };
 
-        var id = Guid.NewGuid().ToString("N")[..8];
-        var location = new LocationRecord(id,label,latitude,longitude,subcity,woreda,city);
-        _store[id] = location ;
+        context.Locations.Add(location);
+        await context.SaveChangesAsync(ct);
+        logger.LogInformation(" Location {LocationId} {Label} in {Subcity} subcity with {Longitude} Longitude and{Latitude} Latiude",
+        location.Id,location.Label,location.Subcity,location.Longitude,location.Latitude);
 
-        _logger.LogInformation(
-            "Created Location {Label}  {Latitude} {Longitude} {Subcity} {Woreda} {City} record {LoctionId}",label,
-            latitude,longitude,subcity,woreda,city,id);
 
-         return Task.FromResult(location);
-    }
-
-    public Task<LocationRecord?> GetByIdAsync(string id)
-    {
-        _store.TryGetValue(id,out var location);
-        if (location is null)
-        {
-            _logger.LogWarning(
-                "Location {LocationId} not found",id
-            );
-        }
-        return Task.FromResult(location);
+        return (await GetByLongitudAsync(location.Longitude,location.Latitude,ct))!;
     }
 
 
-
-    public Task<IReadOnlyList<LocationRecord>> GetAllAsync()
-    {
-        IReadOnlyList<LocationRecord> all = _store.Values.ToList();
-        return Task.FromResult(all);
-    }
-
-    public Task<bool> DeleteAsync(string id)
-    {
-        var removed = _store.Remove(id);
-        if(removed)
-        {
-            _logger.LogInformation("Deleted Location {LocationId}",id);
-        }
-        else
-        {
-            _logger.LogWarning(
-                "Deleted failed. Location {LocationId} not Found",id);
-        }
-        return Task.FromResult(removed);
-    }
-
+     
+    
 }
-
-public record LocationRecord(
-    string Id,
-    string Label,
-    decimal Latitude,
-    decimal Longitude,
-    string Subcity,
-    string Woreda,
-    string City
-);

@@ -1,81 +1,43 @@
 
 
-public class InventoryService : IInventoryService
+using Microsoft.EntityFrameworkCore;
+using PmfApi.Data;
+using PmfApi.Dto;
+using PmfApi.Entities;
+using PmfApi.Interface;
+
+namespace PmfApi.Service;
+
+public class InventoryService(PmfDbContext context, ILogger<InventoryService> logger) :
+IInventoryService
 {
-  private readonly Dictionary<string, InventoryRecord> _store = new ();
+    public Task<InventoryResponse?> GetByIdAsync(int pharmacyId, int medicineId, int id,CancellationToken ct) =>
+     context.Inventories
+     .AsNoTracking()
+     .Where(e => e.Id == id && e.MedicineId == medicineId && e.PharmacyId == pharmacyId)
+     .Select(e => new InventoryResponse (e.Id, e.MedicineId, e.PharmacyId,e.UserId, e.Price,e.Status,e.LastUpdatedAt))
+     .FirstOrDefaultAsync(ct);
 
-  private readonly ILogger<InventoryService> _logger;
-
-  public InventoryService(ILogger<InventoryService> logger)
+     public async Task<InventoryResponse> CreateAsync(int pharmacyId, int medicineId,InventoryRequest request,CancellationToken ct)
     {
-        _logger = logger;
-    }
-
-    public Task<InventoryRecord> CreateAsync(string medicineId,string pharmacyId,decimal price)
-    {
-     var existing = _store.Values
-     .FirstOrDefault(
-            l => l.MedicineId == medicineId && l.PharmacyId == pharmacyId);
-     if(existing is not null)
+        var inventory = new Inventory
         {
-            _logger.LogWarning(
-                "Duplicate Inventory {MedicineId} {PharmacyId} already exitst in {InventoryId}",
-                medicineId,pharmacyId,existing.Id);
-            return Task.FromResult(existing);
-           
-        }
+            PharmacyId = pharmacyId,
+            MedicineId = pharmacyId,
+            Status = request.Status,
+            UserId = request.UserId,
+            LastUpdatedAt = DateTime.UtcNow
+        };
 
-        var id = Guid.NewGuid().ToString("N")[..8];
-        var inventory = new InventoryRecord(id,medicineId,pharmacyId,price,DateTime.UtcNow);
-        _store[id] = inventory ;
+        context.Inventories.Add(inventory);
+        await context.SaveChangesAsync(ct);
+        
+        logger.LogInformation("Inventory {InventoryId} Created for Medicine {MedicineId} in Pharmacy {PharmacyId} with {PriceId} Price",
+           inventory.Id,inventory.MedicineId,inventory.PharmacyId,inventory.Price
+        );
+        return (await GetByIdAsync(pharmacyId,medicineId,inventory.Id,ct))!;
 
-        _logger.LogInformation(
-            "Created Inventory {MedicineId}  {PharmacyId} {Price}  record {InventoryId}",
-            medicineId,pharmacyId,price,id);
-
-         return Task.FromResult(inventory);
+        throw new NotImplementedException();
+        
     }
-
-    public Task<InventoryRecord?> GetByIdAsync(string id)
-    {
-        _store.TryGetValue(id,out var inventory);
-        if (inventory is null)
-        {
-            _logger.LogWarning(
-                "Inventory {InventoryId} not found",id
-            );
-        }
-        return Task.FromResult(inventory);
-    }
-
-
-
-    public Task<IReadOnlyList<InventoryRecord>> GetAllAsync()
-    {
-        IReadOnlyList<InventoryRecord> all = _store.Values.ToList();
-        return Task.FromResult(all);
-    }
-
-    public Task<bool> DeleteAsync(string id)
-    {
-        var removed = _store.Remove(id);
-        if(removed)
-        {
-            _logger.LogInformation("Deleted Inventory {InventoryId}",id);
-        }
-        else
-        {
-            _logger.LogWarning(
-                "Deleted failed. Inventory {InventoryId} not Found",id);
-        }
-        return Task.FromResult(removed);
-    }
-
 }
-public record InventoryRecord(
-    string Id,
-    string MedicineId,
-    string PharmacyId,
-    decimal Price,
-    DateTime LastUpdateAt
-);

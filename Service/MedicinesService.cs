@@ -1,91 +1,40 @@
 
 
-public class MedicinesService : IMedicinesService
+using Microsoft.EntityFrameworkCore;
+using PmfApi.Data;
+using PmfApi.Dto;
+using PmfApi.Entities;
+
+namespace PmfApi.Service;
+public class MedicinesService(PmfDbContext context, ILogger<MedicinesService> logger) 
+: IMedicinesService
+
 {
-    private readonly Dictionary<string, MedicinesRecord> _store = new();
-    private readonly ILogger<MedicinesService> _logger;
-    
-    public MedicinesService(ILogger<MedicinesService> logger)
-    {
-        _logger = logger;
-    }
+  public Task<MedicineResponse?> GetByIdAsync(int id,CancellationToken ct) =>
+  context.Medicines.AsNoTracking()
+  .Where(m => m.Id == id)
+  .Select(m => new MedicineResponse (
+    m.Id,m.GenericName,m.BrandName,m.Category,
+    m.DosageForm,m.Strength,m.IsActive,m.RequeiresPrescription
+  )).FirstOrDefaultAsync(ct);
 
-    public Task<MedicinesRecord> CreateAsync(string genericname,string brandname,string category
-  ,string dosegeform,string strength,bool requeirsprescription,bool isactive)
+  public async Task<MedicineResponse> CreateAsync(MedicineRequest request,CancellationToken ct)
     {
-        var existing = _store.Values
-        .FirstOrDefault( m => m.GenericName == genericname && m.BrandName == brandname);
-        if(existing is not null)
+        var medicine = new Medicine
         {
-            _logger.LogWarning(
-                "Dupliacte Medicinies {GenericName} {BrandName} already exists (record {MedicinesId})",
-                genericname,brandname,existing.Id
-            );
-            return Task.FromResult(existing);
-        }
-     var id = Guid.NewGuid().ToString("N")[..8];
-
-     var medicinies = new MedicinesRecord
-     (id,genericname, brandname,category
-  ,dosegeform,strength,requeirsprescription,isactive);
-
-  _store[id] = medicinies;
-
-  _logger.LogInformation(
-    "Created Medicinies {GenericName} {BrandName} {Category} {DosegeForm}v{Strength} {RequerieScription} {IsActive} record {MediciniesId}",
-    genericname, brandname,category
-  ,dosegeform,strength,requeirsprescription,isactive,id
-  );
-     return Task.FromResult(medicinies);
-    }
-
-public Task<MedicinesRecord?> GetByIdAsync(string id)
-    {
-        _store.TryGetValue(id, out var medicines);
-
-        if (medicines is null )
-        {
-            _logger.LogWarning("Medicinies {MedicineId} not found",id);
-        }
-
-        return Task.FromResult(medicines);
-    }
-
-    public Task<IReadOnlyList<MedicinesRecord>> GetAllAsync()
-    {
-        IReadOnlyList<MedicinesRecord> all = _store.Values.ToList();
-        return Task.FromResult(all);
-    }
-
-    public Task<bool> DeleteAsync(string id)
-    {
-        var removed =_store.Remove(id);
-
-        if(removed)
-        {
-            _logger.LogInformation("Deleted Medicinies {MediciniesId}",id);
-        }
-        else
-        {
-            _logger.LogWarning("Deleted failed. Medicinies {MediciniesId} not found",id);
-        }
-        return Task.FromResult(removed);
+            GenericName = request.GenericName,
+            BrandName = request.BrandName,
+            IsActive = request.IsActice,
+            RequeiresPrescription = request.RequeiresPresciption
+        };
+        context.Medicines.Add(medicine);
+        await context.SaveChangesAsync(ct);
+        logger.LogInformation("Created Medicinies {MedicineId} with {GenericName} and {BrandName} ",
+         medicine.Id,medicine.GenericName,medicine.BrandName
+        );
+        return (await GetByIdAsync(medicine.Id,ct))!;
     }
 
 
 
 }
-
-
-
-public record MedicinesRecord(
-string Id,
-string GenericName,
-string BrandName,
-string Category,
-string DosageForm,
-string Strength,
-bool RequeiresPrescription,
-bool IssActive
-);
-

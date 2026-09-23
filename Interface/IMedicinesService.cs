@@ -1,12 +1,11 @@
+using PmfApi.Dto;
+using PmfApi.Entities;
+
 public interface IMedicinesService
 {
-  Task<MedicinesRecord> CreateAsync(string genericname,string brandname,string category
-  ,string dosegeform,string strength,bool requeirsprescription,bool isactive);
+   Task<MedicineResponse> CreateAsync(MedicineRequest request,CancellationToken ct);
 
-  Task<MedicinesRecord?> GetByIdAsync(string id);
+  Task<MedicineResponse?> GetByIdAsync(int id,CancellationToken ct);
 
-  Task<IReadOnlyList<MedicinesRecord>> GetAllAsync();
-
-  Task<bool> DeleteAsync (string id); 
-
+  
 }

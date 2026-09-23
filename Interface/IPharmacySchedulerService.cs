@@ -1,13 +1,12 @@
+using PmfApi.Dto;
+using PmfApi.Entities;
+
 public interface IPharmaciesScheduleService
 {
-   Task<PharmaciesScheduleRecord> CreateAsync(string  pharmacyId , int dayOfWeek,
-    DateTime openTime,DateTime closedTime,bool isClosed);
+   Task<PharmacyScheduleResponse> CreateAsync(int phamrmacyId,PharmaciesScheduleRequest request,CancellationToken ct);
 
-   Task<PharmaciesScheduleRecord?> GetByIdAsync(string id);
+   Task<PharmacyScheduleResponse?> GetByPhramacyIdAsync(int phamrmacyId,int id,CancellationToken ct);
 
-   Task<IReadOnlyList<PharmaciesScheduleRecord>> GetAllAsync();
-
-   Task<bool> DeleteAsync(string id);
 
     
 }

@@ -1,11 +1,12 @@
+using PmfApi.Dto;
+using PmfApi.Entities;
+
 public interface IUserFeedBackService
 {
-    Task<UserFeedBackRecord> CreateAsync (string userId,string inventoryId,
-    string pharmacyId,bool wasMedicineAvailable,DateTime submittedAt,string comments);
+    Task<UserFeedBackResponse> CreateAsync (int userId,UserFeedBackRequest request,CancellationToken ct);
 
-    Task<UserFeedBackRecord?> GetByIdAsync(string id);
+   Task<UserFeedBackResponse?> GetByUserIdAsync(int userId,int inventoryId,CancellationToken ct);
 
-    Task<IReadOnlyList<UserFeedBackRecord>> GetAllAsync ();
 
-    Task<bool> DeleteAsync(string id);
+   
 }
