@@ -48,6 +48,54 @@ public class ReportController(PmfDbContext context) : ControllerBase
         return Ok(list);
 
     }
+    [HttpGet("paged/pharmacies")]
+    public async Task<IActionResult> PharmaciesGroup(int pagesize = 20,
+    int pageNumber = 1,
+    CancellationToken ct = default)
+    {
+        var page = await context.Pharmacies
+        .OrderBy( p => p.Name)
+        .Skip((pageNumber -1 ) * pagesize)
+        .Take(pagesize)
+        .ToListAsync(ct);
+
+        return Ok(page);
+
+    }
+    [HttpGet("paged/medicinies")]
+    public async Task<IActionResult> MediciniesGroup(int pagesize = 20,
+    int pageNumber = 1,
+    CancellationToken ct = default)
+    {
+        var page = await context.Medicines
+        .OrderBy( p => p.GenericName)
+        .Skip((pageNumber -1 ) * pagesize)
+        .Take(pagesize)
+        .ToListAsync(ct);
+        return Ok(page);
+
+    }
+    [HttpGet("Paginate/inventories")]
+    public async Task<IActionResult> GetTopCourses(
+    CancellationToken ct = default)
+    {
+ var pharmacies = await context.Inventories
+ .GroupBy(i => i.PharmacyId)
+ .Select(g => new
+ {
+     
+     Medicine = g.Key,
+     MedicineCount = g.Count(),
+     ReliablityScore = g.Average(p=>p.Pharmacy.ReliablityScore),
+     lowPrice = g.Min(i => i.Price)
+    
+     }).OrderByDescending(s => s.MedicineCount)
+ .Take(5)
+  .ToListAsync(ct);
+
+  return Ok(pharmacies);
+
+    }
 
 
 
