@@ -22,7 +22,7 @@ public static class DataSeeder
         ("Arada Branch Area", "Arada", "10", 9.0350m, 38.7469m),
     ];
 
-    private static readonly (string GenericName, string BrandName, 
+    private static readonly (string GenericName, string BrandName,
     string Category, string DosageForm, string Strength,
      bool RequiresPrescription)[] Medicines =
     [
@@ -38,7 +38,7 @@ public static class DataSeeder
         ("Ascorbic Acid", "Vitamin C", "Supplement", "Tablet", "1000mg", false),
     ];
 
-    private static readonly (string Name, string LicenceNumber, 
+    private static readonly (string Name, string LicenceNumber,
     int PhoneNumber, string Email, bool IsVerified,
      decimal ReliablityScore, int FreshnessThreshold, int LocationIndex)
      [] Pharmacies =
@@ -72,7 +72,7 @@ public static class DataSeeder
         ("System Administrator", "admin@pmf.et", "Admin", 1),
     ];
 
-    public static async Task SeedAsync(PmfDbContext context, 
+    public static async Task SeedAsync(PmfDbContext context,
      CancellationToken ct = default)
     {
         await context.Database.MigrateAsync(ct);
@@ -110,12 +110,18 @@ public static class DataSeeder
                 Category = category,
                 DosageForm = dosageForm,
                 Strength = strength,
-                RequeiresPrescription = requiresPrescription
+                RequeiresPrescription = requiresPrescription,
+                // Explicit for clarity - Medicine.IsActive already defaults to true,
+                // but SearchService filters on it, so keep it obvious here.
+                IsActive = true
             });
         }
         await context.SaveChangesAsync(ct);
 
-        var locations = await context.Locations.ToListAsync(ct);
+        // Order explicitly - EF/SQL does not guarantee row order without OrderBy,
+        // and every downstream index-based lookup (LocationIndex, p/m loops)
+        // depends on these lists matching the declaration order above.
+        var locations = await context.Locations.OrderBy(l => l.Id).ToListAsync(ct);
 
         foreach (var (name, licenceNumber, phoneNumber, email,
          isVerified, reliablityScore, freshnessThreshold, locationIndex)
@@ -131,23 +137,29 @@ public static class DataSeeder
                 ReliablityScore = reliablityScore,
                 FreshnessThreshold = freshnessThreshold,
                 LastInventoryUpdateAt = DateTime.UtcNow.AddDays(-1),
-                LocationId = locations[locationIndex].Id
+                LocationId = locations[locationIndex].Id,
+                // Explicit for clarity - Pharmacy.IsActive already defaults to true,
+                // but SearchService filters on it, so keep it obvious here.
+                IsActive = true
             });
         }
         await context.SaveChangesAsync(ct);
 
-        var pharmacies = await context.Pharmacies.ToListAsync(ct);
+        var pharmacies = await context.Pharmacies.OrderBy(p => p.Id).ToListAsync(ct);
 
         foreach (var pharmacy in pharmacies)
         {
-            context.PharmaciesSchedules.Add(new PharmaciesSchedule
+                for (var dow = 0; dow < 7; dow++)
             {
-                PharmacyId = pharmacy.Id,
-                DayOfWeek = 1,
-                OpenTime = DateTime.UtcNow.Date.AddHours(8),
-                ClosedTime = DateTime.UtcNow.Date.AddHours(20),
-                ISClosed = false
-            });
+                context.PharmaciesSchedules.Add(new PharmaciesSchedule
+                {
+                    PharmacyId = pharmacy.Id,
+                    DayOfWeek = dow,
+                    OpenTime = DateTime.UtcNow.Date.AddHours(8),
+                    ClosedTime = DateTime.UtcNow.Date.AddHours(20),
+                    ISClosed = false
+                });
+            }
         }
         await context.SaveChangesAsync(ct);
 
@@ -166,21 +178,34 @@ public static class DataSeeder
         }
         await context.SaveChangesAsync(ct);
 
-        var medicines = await context.Medicines.ToListAsync(ct);
+        var medicines = await context.Medicines.OrderBy(m => m.Id).ToListAsync(ct);
         var pharmacyStaff = await context.Users
-        .Where(u => u.Role.Name == "PharmacyStaff").ToListAsync(ct);
-        var inventoryPrices = new decimal[] { 45m, 120m, 60m, 95m, 210m };
+            .Where(u => u.Role.Name == "PharmacyStaff")
+            .OrderBy(u => u.Id)
+            .ToListAsync(ct);
 
-        for (var p = 0; p < 5; p++)
+         var basePrices = new decimal[]
         {
-            for (var m = 0; m < 5; m++)
+            45m,120m,60m, 95m, 
+            210m,180m,75m,130m, 
+            250m, 50m  
+        };
+
+        // Give every verified, active pharmacy inventory for every medicine so
+        // search results actually exercise all seeded pharmacies/medicines,
+        // instead of only the first 5 of each.
+        for (var p = 0; p < pharmacies.Count; p++)
+        {
+              var staff = pharmacyStaff[p % pharmacyStaff.Count];
+
+            for (var m = 0; m < medicines.Count; m++)
             {
                 context.Inventories.Add(new Inventory
                 {
                     PharmacyId = pharmacies[p].Id,
                     MedicineId = medicines[m].Id,
-                    UserId = pharmacyStaff[p].Id,
-                    Price = inventoryPrices[m] + (p * 5m),
+                    UpdatebyUserId = staff.Id,
+                    Price = basePrices[m] + (p * 5m),
                     Status = "Fresh",
                     LastUpdatedAt = DateTime.UtcNow.AddDays(-p)
                 });

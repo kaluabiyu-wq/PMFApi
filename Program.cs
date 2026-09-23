@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PmfApi.Data;
 using PmfApi.Entities;
+using PmfApi.Filters;
 using PmfApi.Interface;
 using PmfApi.Service;
 using Scalar.AspNetCore;
@@ -35,13 +36,19 @@ builder.Services.AddScoped<ISearchService,SearchService>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<AuditLogFilter>();
+}
+
+);
 
 builder.Host.UseDefaultServiceProvider(options =>
 {
     options.ValidateScopes = true;
     options.ValidateOnBuild = true;
 });
+
 
 builder.Services.AddAuthorization();
 

@@ -12,7 +12,7 @@ public class Inventory
 
      public decimal Price {get;set;}
 
-     public int UserId {get;set;}
+     public int UpdatebyUserId {get;set;}
 
      public string Status {get;set;} = "Fresh";
 

@@ -5,7 +5,7 @@ public interface IPharmaciesService
 {
    Task<PharmacyResponse> CreateAsync(PharmacyRequest request,CancellationToken ct);
 
-   Task<PharmacyResponse?> GetBylicenceAsync(string licenceNumber,CancellationToken ct);
+   Task<PharmacyResponse?> GetByIdAsync(int id,CancellationToken ct);
 
 
     Task<PagedResponse<PharmacyResponse>> GetPharmacyAsync(PagedRequest request, CancellationToken ct);
