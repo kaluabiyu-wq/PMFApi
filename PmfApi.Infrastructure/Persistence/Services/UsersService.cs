@@ -5,12 +5,14 @@ using PmfApi.Application.Dtos;
 using PmfApi.Domain.Entities;
 using PmfApi.Application.Interfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
 
 namespace PmfApi.Infrastructure.Persistence.Services;
 public class UserService(PmfDbContext context,ILogger<UserService> logger)
 : IUserService
 {
-    
+    private readonly PasswordHasher<User> passwordHasher = new();
+
 public async Task<UserResponse> CreateAsync(UserRequest request,CancellationToken ct)
     {
          var user = new User
@@ -18,16 +20,17 @@ public async Task<UserResponse> CreateAsync(UserRequest request,CancellationToke
             FullName = request.FullName,
             Email = request.Email,
             RoleId = request.RoleId,
-             Password = request.Password,
+             Password = string.Empty,
             LocationId = request.LocationId
 
             
         };
+        user.Password = passwordHasher.HashPassword(user, request.Password);
         context.Users.Add(user);
         await context.SaveChangesAsync(ct);
 
-        logger.LogInformation("Created User {UserId} {FullName} {Email} {Password}",
-            user.Id,user.FullName,user.Email,user.Password);
+        logger.LogInformation("Created User {UserId} {FullName} {Email}",
+            user.Id,user.FullName,user.Email);
 
         return (await GetByeEmailAsync(user.Email,ct))!;
     }
@@ -39,7 +42,7 @@ public Task<UserResponse?> GetByeEmailAsync(string email, CancellationToken ct) 
        context.Users.AsNoTracking()
        .Where(u => u.Email == email)
        .Select( u=>  new UserResponse(
-        u.Id,u.FullName,u.Email,u.Password,
+        u.Id,u.FullName,u.Email,
         u.LocationId,u.IsActive,u.RoleId
       ,u.CreatedAt)).FirstOrDefaultAsync(ct);
 
@@ -47,7 +50,7 @@ public Task<UserResponse?> GetByeEmailAsync(string email, CancellationToken ct) 
        context.Users.AsNoTracking()
        .Where(u => u.Id == id)
        .Select( u=>  new UserResponse(
-        u.Id,u.FullName,u.Email,u.Password,
+        u.Id,u.FullName,u.Email,
         u.LocationId,u.IsActive,u.RoleId
       ,u.CreatedAt)).FirstOrDefaultAsync(ct);
 
@@ -80,7 +83,7 @@ public async Task<PagedResponse<UserResponse>> GetUserAsync(PagedRequest request
         .Skip((request.Page - 1) * request.PageSize)
         .Take(request.PageSize)
         .Select(u => new UserResponse( u.Id,u.FullName,
-        u.Email,u.Password,u.LocationId,u.IsActive,
+        u.Email,u.LocationId,u.IsActive,
         u.RoleId,u.CreatedAt))
         .ToListAsync(ct);
 
@@ -93,4 +96,3 @@ public async Task<PagedResponse<UserResponse>> GetUserAsync(PagedRequest request
     };
 }
 }
-

@@ -9,6 +9,7 @@ using PmfApi.Filters;
 using PmfApi.Application.Interfaces;
 using PmfApi.Infrastructure.Persistence.Services;
 using Scalar.AspNetCore;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,7 @@ builder.Services.AddScoped<IPharmacyDocumentService,PharmacyDocumentService>();
 builder.Services.AddScoped<IReviewService,ReviewService>();
 builder.Services.AddScoped<IFavoriteService,FavoriteService>();
 builder.Services.AddScoped<IPharmacyAdminService,PharmacyAdminService>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 builder.Services.AddCors(options =>
 {
