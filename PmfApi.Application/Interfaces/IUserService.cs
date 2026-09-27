@@ -13,5 +13,6 @@ Task<UserResponse?> GetByeEmailAsync(string email, CancellationToken ct);
 Task<UserResponse?> GetByIdAsync(int id, CancellationToken ct);
 
 Task<PagedResponse<UserResponse>> GetUserAsync(PagedRequest request, CancellationToken ct);
+Task<User?> GetUserEntityByEmailAsync(string Email, CancellationToken ct);
 
 }
