@@ -258,3 +258,8 @@ C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\obj\Debug\net10.0\refint\PmfApi.A
 C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\obj\Debug\net10.0\PmfApi.Api.pdb
 C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\obj\Debug\net10.0\PmfApi.Api.genruntimeconfig.cache
 C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\obj\Debug\net10.0\ref\PmfApi.Api.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll
