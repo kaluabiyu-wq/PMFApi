@@ -95,4 +95,10 @@ public async Task<PagedResponse<UserResponse>> GetUserAsync(PagedRequest request
         PageSize = request.PageSize
     };
 }
+ 
+ public Task<User?> GetUserEntityByEmailAsync(string email, CancellationToken ct) =>
+   context.Users
+   .Include(u=>u.Role)
+   .AsNoTracking()
+   .FirstOrDefaultAsync(u=>u.Email == email,ct);
 }
