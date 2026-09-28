@@ -29,7 +29,10 @@ public class PharamaciesSerivce(PmfDbContext context, ILogger<PharamaciesSerivce
             Name = request.Name,
             LicenceNumber = request.LicenseNumber,
             LocationId = request.LocationId,
-            IsVerified = request.IsVerified
+            IsVerified = request.IsVerified,
+            PhoneNumber = request.PhoneNumber,
+            Email = request.Email,
+            FreshnessThreshold = request.FreshnessThreshold
             
         };
         context.Pharmacies.Add(pharmacies);
