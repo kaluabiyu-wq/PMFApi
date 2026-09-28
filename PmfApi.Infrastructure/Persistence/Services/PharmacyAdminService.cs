@@ -129,13 +129,24 @@ public class PharmacyAdminService(PmfDbContext context, ILogger<PharmacyAdminSer
     {
         var pharmacy = await context.Pharmacies.FirstOrDefaultAsync(p => p.Id == pharmacyId, ct);
         if (pharmacy is null) return null;
-
-        pharmacy.Name = request.Name;
-        pharmacy.LicenceNumber = request.LicenseNumber;
-        pharmacy.LocationId = request.LocationId;
-        pharmacy.PhoneNumber = request.PhoneNumber;
-        pharmacy.Email = request.Email;
-        pharmacy.FreshnessThreshold = request.FreshnessThreshold;
+        
+        if (!string.IsNullOrWhiteSpace(request.Name))
+            pharmacy.Name = request.Name.Trim();
+ 
+        if (!string.IsNullOrWhiteSpace(request.LicenseNumber))
+            pharmacy.LicenceNumber = request.LicenseNumber.Trim();
+ 
+        if (request.LocationId is not null)
+            pharmacy.LocationId = request.LocationId.Value;
+ 
+        if (request.PhoneNumber is not null)
+            pharmacy.PhoneNumber = request.PhoneNumber.Value;
+ 
+           if (request.Email is not null)
+            pharmacy.Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
+ 
+        if (request.FreshnessThreshold is not null)
+            pharmacy.FreshnessThreshold = request.FreshnessThreshold.Value;
 
         await context.SaveChangesAsync(ct);
 

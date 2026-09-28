@@ -37,8 +37,8 @@ public class PharmacyAdminController(IPharmacyAdminService pharmacyAdminService)
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [EndpointSummary("Edit a pharmacy's profile")]
-    [EndpointDescription("Updates name, licence number, location, phone, email, and freshness threshold. Returns 404 if no pharmacy exists with that ID.")]
-    public async Task<IActionResult> UpdatePharmacy(int id, PharmacyUpdateRequest request, CancellationToken ct)
+    [EndpointDescription("Updates name, licence number, location, phone, email, and freshness threshold. Only the fields present in the request body are changed; omitted fields keep their stored value. For email, send an empty string to clear it. Returns 404 if no pharmacy exists with that ID.")]
+        public async Task<IActionResult> UpdatePharmacy(int id, PharmacyUpdateRequest request, CancellationToken ct)
     {
         var result = await pharmacyAdminService.UpdateAsync(id, request, ct);
         return result is not null ? Ok(result) : NotFound();
