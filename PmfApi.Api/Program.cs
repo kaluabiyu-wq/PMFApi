@@ -10,6 +10,9 @@ using PmfApi.Application.Interfaces;
 using PmfApi.Infrastructure.Persistence.Services;
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+using PmfApi.Api.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +45,8 @@ builder.Services.AddScoped<IPharmacyAdminService,PharmacyAdminService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IAuthService,AuthService>();
 builder.Services.AddScoped<ITokenService,TokenService>();
+builder.Services.AddScoped<IAuthorizationHandler, PharmacyOwnerHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, PharmacyDocumentReviewHandler>();
 
 
 builder.Services.AddCors(options =>
@@ -68,7 +73,37 @@ builder.Host.UseDefaultServiceProvider(options =>
 });
 
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+   
+    options.AddPolicy("PharmacyOwnerOrAdmin", policy =>
+        policy.Requirements.Add(new PharmacyOwnerRequirement(
+            allowSystemAdmin: true,
+            requiredElevatedStaffRole: true)));
+ 
+    
+    options.AddPolicy("PharmacyOwner", policy =>
+        policy.Requirements.Add(new PharmacyOwnerRequirement()));
+ 
+   
+    options.AddPolicy("DocumentReview", policy =>
+        policy.Requirements.Add(new PharmacyDocumentReviewRequirement()));
+});
+ 
+builder.Services.AddRateLimiter(options =>
+{
+    
+    options.AddTokenBucketLimiter("AuthLimiter", limiterOptions =>
+    {
+        limiterOptions.TokenLimit = 5;
+        limiterOptions.TokensPerPeriod = 5;
+        limiterOptions.ReplenishmentPeriod = TimeSpan.FromMinutes(1);
+        limiterOptions.QueueLimit = 0;
+        limiterOptions.AutoReplenishment = true;
+    });
+ 
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
 
 var app = builder.Build();
 
@@ -91,14 +126,20 @@ app.UseStatusCodePages();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors("AllowAngular");
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
+app.UseRateLimiter();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment()) { 
-    using var scope = app.Services.CreateScope(); 
-    var context = scope.ServiceProvider.GetRequiredService<PmfDbContext>(); 
-    await DataSeeder.SeedAsync(context);
-     }
+
+
+// if (app.Environment.IsDevelopment()) { 
+//     using var scope = app.Services.CreateScope(); 
+//     var context = scope.ServiceProvider.GetRequiredService<PmfDbContext>(); 
+//     await DataSeeder.SeedAsync(context);
+//      }
 
 
 app.MapGet("/api/error", () =>

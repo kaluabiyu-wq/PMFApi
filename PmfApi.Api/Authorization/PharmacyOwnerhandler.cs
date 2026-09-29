@@ -20,6 +20,15 @@ public class PharmacyOwnerHandler(PmfDbContext dbContext)
             return;
         }
 
+        
+        if (requirement.RequireElevatedStaffRole
+            && !context.User.IsInRole(RoleNames.PharmacyStaff)
+            && !context.User.IsInRole(RoleNames.PharmacyAdmin))
+        {
+             return;
+        }
+        
+
          var userIdClaim = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdClaim, out var userId))
         {

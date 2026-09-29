@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PmfApi.Application.Interfaces;
 using PmfApi.Application.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PmfApi.Api.Controllers;
 
@@ -9,7 +10,9 @@ namespace PmfApi.Api.Controllers;
 [Tags("Pharmacy Admin")]
 [Produces("application/json")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-public class PharmacyAdminController(IPharmacyAdminService pharmacyAdminService) : ControllerBase
+public class PharmacyAdminController(IPharmacyAdminService pharmacyAdminService,
+ IPharmaciesService pharmaciesService,
+ IAuthorizationService authorizationService) : ControllerBase
 {
     [HttpGet(Name = nameof(GetPharmacies))]
     [ProducesResponseType(typeof(PagedResponse<PharmacyAdminSummaryResponse>), StatusCodes.Status200OK)]
@@ -63,6 +66,11 @@ public class PharmacyAdminController(IPharmacyAdminService pharmacyAdminService)
     [EndpointDescription("Soft-deletes the pharmacy (IsActive=false) so staff, documents, inventory, and review history are preserved rather than destroyed. Returns 404 if no pharmacy exists with that ID.")]
     public async Task<IActionResult> DeletePharmacy(int id, CancellationToken ct)
     {
+          var pharmacy = await pharmaciesService.GetEntityByIdAsync(id, ct);
+        if (pharmacy is null) return NotFound();
+ 
+        var authResult = await authorizationService.AuthorizeAsync(User, pharmacy, "PharmacyOwnerOrAdmin");
+        if (!authResult.Succeeded) return Forbid();
         var deleted = await pharmacyAdminService.DeleteAsync(id, ct);
         return deleted ? NoContent() : NotFound();
     }
