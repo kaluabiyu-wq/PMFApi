@@ -48,7 +48,7 @@ public class PharmacyDocumentService(PmfDbContext context, ILogger<PharmacyDocum
         d.ReviewedByUserId, d.ReviewStatus, d.ExpiresAt
     )).ToListAsync(ct);
 
-    public async Task<PharmacyDocumentResponse?> ReviewAsync(int pharmacyId, int id, PharmacyDocumentReviewRequest request, CancellationToken ct)
+    public async Task<PharmacyDocumentResponse?> ReviewAsync(int pharmacyId, int id, int reviewerId, PharmacyDocumentReviewRequest request, CancellationToken ct)
     {
         var document = await context.PharmacyDocuments
             .FirstOrDefaultAsync(d => d.Id == id && d.PharmacyId == pharmacyId, ct);
@@ -56,7 +56,7 @@ public class PharmacyDocumentService(PmfDbContext context, ILogger<PharmacyDocum
         if (document is null) return null;
 
         document.ReviewStatus = request.ReviewStatus;
-        document.ReviewedByUserId = request.ReviewedByUserId;
+        document.ReviewedByUserId = reviewerId;
         await context.SaveChangesAsync(ct);
 
         logger.LogInformation("Document {DocumentId} for Pharmacy {PharmacyId} reviewed by User {ReviewerId} -> {ReviewStatus}",

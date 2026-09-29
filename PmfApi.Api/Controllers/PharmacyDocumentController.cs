@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PmfApi.Application.Interfaces;
 using PmfApi.Application.Dtos;
+using System.Security.Claims;
 
 namespace PmfApi.Api.Controllers;
 
@@ -66,8 +67,9 @@ public class PharmacyDocumentController(
     {
         var notFound = await CheckPharmacyExistsAsync(pharmacyId, ct);
         if (notFound is not null) return notFound;
+        var reviewerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        var result = await pharmacyDocumentService.ReviewAsync(pharmacyId, id, request, ct);
+        var result = await pharmacyDocumentService.ReviewAsync(pharmacyId, id, reviewerId, request, ct);
         return result is not null ? Ok(result) : NotFound();
     }
 

@@ -12,5 +12,7 @@ public interface IPharmaciesService
 
 
     Task<PagedResponse<PharmacyResponse>> GetPharmacyAsync(PagedRequest request, CancellationToken ct);
+
+    Task<Pharmacy?> GetEntityByIdAsync(int id, CancellationToken ct);
   
 }

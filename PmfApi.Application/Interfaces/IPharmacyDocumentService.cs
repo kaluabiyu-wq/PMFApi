@@ -10,5 +10,7 @@ public interface IPharmacyDocumentService
 
     Task<List<PharmacyDocumentResponse>> GetByPharmacyAsync(int pharmacyId, CancellationToken ct);
 
-       Task<PharmacyDocumentResponse?> ReviewAsync(int pharmacyId, int id, PharmacyDocumentReviewRequest request, CancellationToken ct);
+       Task<PharmacyDocumentResponse?> ReviewAsync(int pharmacyId, int id,int reviewerId,  PharmacyDocumentReviewRequest request, CancellationToken ct);
+
+    
 }

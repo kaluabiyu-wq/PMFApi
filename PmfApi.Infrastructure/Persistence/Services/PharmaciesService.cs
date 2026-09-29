@@ -90,4 +90,9 @@ public async Task<PagedResponse<PharmacyResponse>> GetPharmacyAsync(PagedRequest
     };
 }
 
+public Task<Pharmacy?> GetEntityByIdAsync(int id, CancellationToken ct) =>
+        context.Pharmacies
+        .AsNoTracking()
+        .FirstOrDefaultAsync(p => p.Id == id, ct);
+
 }
