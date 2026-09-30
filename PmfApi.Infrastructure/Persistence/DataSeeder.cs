@@ -13,8 +13,15 @@ public static class DataSeeder
     [
         ("Patient", "Searches medicine availability and views pharmacy details"),
         ("Pharmacy", "Owns and manages a registered pharmacy account"),
-        ("PharmacyStaff", "Manages inventory on behalf of a pharmacy"),
-        ("Admin", "System-wide administrator"),
+        ("PharmacyAdmin", "Manages inventory and staff on behalf of a pharmacy"),
+        ("SysAdmin", "System-wide administrator"),
+    ];
+
+    // Old role names that exist in databases seeded before this change.
+    private static readonly (string OldName, string NewName)[] LegacyRoleNames =
+    [
+        ("Admin", "SysAdmin"),
+        ("PharmacyStaff", "PharmacyAdmin"),
     ];
 
     private static readonly (string Label, string Subcity, string Woreda,
@@ -102,13 +109,13 @@ public static class DataSeeder
         ("Hanna Girma", "hanna.girma@example.com", "Patient", 2),
         ("Yonas Tesfaye", "yonas.tesfaye@example.com", "Patient", 3),
         ("Marta Solomon", "marta.solomon@example.com", "Patient", 0),
-        ("Abel Kebede", "abel.kebede@kenemapharmacy.et", "PharmacyStaff", 0),
-        ("Meklit Fikru", "meklit.fikru@tikuranbessa.et", "PharmacyStaff", 1),
-        ("Nathnael Wolde", "nathnael.wolde@zewditupharmacy.et", "PharmacyStaff", 2),
-        ("Ruth Assefa", "ruth.assefa@bolefenta.et", "PharmacyStaff", 0),
-        ("Kalkidan Mulu", "kalkidan.mulu@addiscure.et", "PharmacyStaff", 3),
-        ("Biniam Tadesse", "biniam.tadesse@kenemapharmacy.et", "Pharmacy", 0),
-        ("System Administrator", "admin@pmf.et", "Admin", 1),
+        ("Abel Kebede", "abel.kebede@kenemapharmacy.et", "Pharmacy", 0),
+        ("Meklit Fikru", "meklit.fikru@tikuranbessa.et", "Pharmacy", 1),
+        ("Nathnael Wolde", "nathnael.wolde@zewditupharmacy.et", "Pharmacy", 2),
+        ("Ruth Assefa", "ruth.assefa@bolefenta.et", "Pharmacy", 0),
+        ("Kalkidan Mulu", "kalkidan.mulu@addiscure.et", "Pharmacy", 3),
+        ("Biniam Tadesse", "biniam.tadesse@kenemapharmacy.et", "PharmacyAdmin", 0),
+        ("System Administrator", "admin@pmf.et", "SysAdmin", 1),
     ];
 
     private static readonly decimal[] BasePrices =
@@ -127,19 +134,12 @@ public static class DataSeeder
     {
         await context.Database.MigrateAsync(ct);
 
-        if (!await context.Roles.AnyAsync(ct))
+        // Runs every time: renames legacy roles and adds any missing ones,
+        // so databases seeded before the role change are fixed too.
+        await SeedRolesAsync(context, ct);
+
+        if (!await context.Locations.AnyAsync(ct))
         {
-            foreach (var (name, description) in Roles)
-            {
-                context.Roles.Add(new Role
-                {
-                    Name = name,
-                    Description = description
-                });
-            }
-
-            await context.SaveChangesAsync(ct);
-
             foreach (var (label, subcity, woreda, lat, lng) in Locations)
             {
                 context.Locations.Add(new Location
@@ -259,14 +259,52 @@ public static class DataSeeder
 
         await SeedInventoriesAsync(context, ct);
 
-         await HashPlainTextPasswordsAsync(context, ct);
+        await HashPlainTextPasswordsAsync(context, ct);
+    }
+
+    private static async Task SeedRolesAsync(
+        PmfDbContext context,
+        CancellationToken ct)
+    {
+        var existing = await context.Roles.ToListAsync(ct);
+
+        // Rename in place so existing users keep their RoleId.
+        foreach (var (oldName, newName) in LegacyRoleNames)
+        {
+            var legacy = existing.FirstOrDefault(r => r.Name == oldName);
+
+            if (legacy is not null && existing.All(r => r.Name != newName))
+            {
+                legacy.Name = newName;
+            }
+        }
+
+        foreach (var (name, description) in Roles)
+        {
+            var role = existing.FirstOrDefault(r => r.Name == name);
+
+            if (role is null)
+            {
+                context.Roles.Add(new Role
+                {
+                    Name = name,
+                    Description = description
+                });
+            }
+            else
+            {
+                role.Description = description;
+            }
+        }
+
+        await context.SaveChangesAsync(ct);
     }
 
     private static async Task HashPlainTextPasswordsAsync(
         PmfDbContext context,
         CancellationToken ct)
     {
-         var users = await context.Users
+        var users = await context.Users
             .Where(u => !u.Password.StartsWith("AQAAAA"))
             .ToListAsync(ct);
 
@@ -295,7 +333,7 @@ public static class DataSeeder
             .Take(10)
             .ToListAsync(ct);
 
-          var extraMedicines = await context.Medicines
+        var extraMedicines = await context.Medicines
             .OrderBy(m => m.Id)
             .Skip(10)
             .Take(15)
@@ -306,8 +344,9 @@ public static class DataSeeder
             .Take(10)
             .ToListAsync(ct);
 
-        var pharmacyStaff = await context.Users
-            .Where(u => u.Role.Name == "PharmacyStaff")
+        // Users who update inventory on behalf of a pharmacy.
+        var pharmacyAdmins = await context.Users
+            .Where(u => u.Role.Name == "PharmacyAdmin")
             .OrderBy(u => u.Id)
             .ToListAsync(ct);
 
@@ -325,10 +364,10 @@ public static class DataSeeder
                 "At least 5 pharmacies are required.");
         }
 
-        if (pharmacyStaff.Count == 0)
+        if (pharmacyAdmins.Count == 0)
         {
             throw new InvalidOperationException(
-                "Cannot seed inventories because no PharmacyStaff users exist.");
+                "Cannot seed inventories because no PharmacyAdmin users exist.");
         }
 
         if (BasePrices.Length < 10)
@@ -339,12 +378,12 @@ public static class DataSeeder
 
         var random = new Random(42);
 
-         var firstFivePharmacies = pharmacies.Take(5).ToList();
+        var firstFivePharmacies = pharmacies.Take(5).ToList();
 
         foreach (var (pharmacy, pharmacyIndex) in
                  firstFivePharmacies.Select((p, i) => (p, i)))
         {
-            var staff = pharmacyStaff[pharmacyIndex % pharmacyStaff.Count];
+            var staff = pharmacyAdmins[pharmacyIndex % pharmacyAdmins.Count];
 
             foreach (var (medicine, medicineIndex) in
                      medicines.Select((m, i) => (m, i)))
@@ -365,7 +404,7 @@ public static class DataSeeder
             }
         }
 
-         var nextFivePharmacies = pharmacies.Skip(5).Take(5).ToList();
+        var nextFivePharmacies = pharmacies.Skip(5).Take(5).ToList();
 
         // The 2 medicines every pharmacy in this batch has in common
         var sharedMedicines = medicines.Take(2).ToList();
@@ -373,7 +412,7 @@ public static class DataSeeder
         foreach (var (pharmacy, pharmacyIndex) in
                  nextFivePharmacies.Select((p, i) => (p, i)))
         {
-            var staff = pharmacyStaff[(pharmacyIndex + 5) % pharmacyStaff.Count];
+            var staff = pharmacyAdmins[(pharmacyIndex + 5) % pharmacyAdmins.Count];
 
             // 2 shared medicines (same across all 5 pharmacies in this batch)
             foreach (var medicine in sharedMedicines)
