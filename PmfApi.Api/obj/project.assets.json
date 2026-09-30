@@ -774,7 +774,10 @@
         },
         "runtime": {
           "bin/placeholder/PmfApi.Application.dll": {}
-        }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
       },
       "PmfApi.Domain/1.0.0": {
         "type": "project",
@@ -802,7 +805,10 @@
         },
         "runtime": {
           "bin/placeholder/PmfApi.Infrastructure.dll": {}
-        }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
       }
     }
   },

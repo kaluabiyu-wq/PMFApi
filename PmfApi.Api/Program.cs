@@ -47,6 +47,8 @@ builder.Services.AddScoped<IAuthService,AuthService>();
 builder.Services.AddScoped<ITokenService,TokenService>();
 builder.Services.AddScoped<IAuthorizationHandler, PharmacyOwnerHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, PharmacyDocumentReviewHandler>();
+builder.Services.AddScoped<IFileStorage,LocalFileStorage>();
+builder.Services.AddScoped<IPharmacyRegistrationService,PharmacyRegistrationService>();
 
 
 builder.Services.AddCors(options =>
@@ -135,11 +137,11 @@ app.UseAuthorization();
 
 
 
-// if (app.Environment.IsDevelopment()) { 
-//     using var scope = app.Services.CreateScope(); 
-//     var context = scope.ServiceProvider.GetRequiredService<PmfDbContext>(); 
-//     await DataSeeder.SeedAsync(context);
-//      }
+if (app.Environment.IsDevelopment()) { 
+    using var scope = app.Services.CreateScope(); 
+    var context = scope.ServiceProvider.GetRequiredService<PmfDbContext>(); 
+    await DataSeeder.SeedAsync(context);
+     }
 
 
 app.MapGet("/api/error", () =>

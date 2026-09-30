@@ -1,12 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "EVudJJL14ME=",
+  "dgSpecHash": "x2PdknWDFTc=",
   "success": true,
   "projectFilePath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\tarik\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\10.0.0\\microsoft.aspnetcore.cryptography.internal.10.0.0.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\10.0.0\\microsoft.aspnetcore.cryptography.keyderivation.10.0.0.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.build.framework\\18.0.2\\microsoft.build.framework.18.0.2.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.codeanalysis.analyzers\\3.11.0\\microsoft.codeanalysis.analyzers.3.11.0.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.codeanalysis.common\\5.0.0\\microsoft.codeanalysis.common.5.0.0.nupkg.sha512",
@@ -19,17 +17,8 @@
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\10.0.11\\microsoft.entityframeworkcore.analyzers.10.0.11.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.entityframeworkcore.design\\10.0.11\\microsoft.entityframeworkcore.design.10.0.11.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\10.0.11\\microsoft.entityframeworkcore.relational.10.0.11.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\10.0.11\\microsoft.extensions.caching.abstractions.10.0.11.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.caching.memory\\10.0.11\\microsoft.extensions.caching.memory.10.0.11.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.11\\microsoft.extensions.configuration.abstractions.10.0.11.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\10.0.11\\microsoft.extensions.dependencyinjection.10.0.11.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.11\\microsoft.extensions.dependencyinjection.abstractions.10.0.11.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.dependencymodel\\10.0.11\\microsoft.extensions.dependencymodel.10.0.11.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.identity.core\\10.0.0\\microsoft.extensions.identity.core.10.0.0.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.logging\\10.0.11\\microsoft.extensions.logging.10.0.11.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\10.0.11\\microsoft.extensions.logging.abstractions.10.0.11.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.options\\10.0.11\\microsoft.extensions.options.10.0.11.nupkg.sha512",
-    "C:\\Users\\tarik\\.nuget\\packages\\microsoft.extensions.primitives\\10.0.11\\microsoft.extensions.primitives.10.0.11.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.identitymodel.abstractions\\8.6.1\\microsoft.identitymodel.abstractions.8.6.1.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.identitymodel.jsonwebtokens\\8.6.1\\microsoft.identitymodel.jsonwebtokens.8.6.1.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.identitymodel.logging\\8.6.1\\microsoft.identitymodel.logging.8.6.1.nupkg.sha512",
@@ -48,5 +37,18 @@
     "C:\\Users\\tarik\\.nuget\\packages\\system.composition.typedparts\\9.0.0\\system.composition.typedparts.9.0.0.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\system.identitymodel.tokens.jwt\\8.6.1\\system.identitymodel.tokens.jwt.8.6.1.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1510",
+      "level": "Warning",
+      "message": "PackageReference Microsoft.Extensions.Identity.Core will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
+      "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Infrastructure\\PmfApi.Infrastructure.csproj",
+      "libraryId": "Microsoft.Extensions.Identity.Core",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }
