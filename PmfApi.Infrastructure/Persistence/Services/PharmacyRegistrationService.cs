@@ -79,9 +79,7 @@ public class PharmacyRegistrationService(
             };
             pharmacy.PharmacyStaff.Add(new PharmacyStaff { User = user, Position = "Owner" });
 
-            // One SaveChanges = one implicit transaction: user, pharmacy, staff link and
-            // documents are all written together or not at all.
-            context.Pharmacies.Add(pharmacy);
+             context.Pharmacies.Add(pharmacy);
             await context.SaveChangesAsync(ct);
 
             logger.LogInformation("Registered pharmacy {PharmacyId} with owner {UserId}", pharmacy.Id, user.Id);
@@ -89,15 +87,14 @@ public class PharmacyRegistrationService(
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" } pg)
         {
-            // Lost a race against another registration; the unique indexes are the source of truth.
-            Cleanup(savedFiles);
+              Cleanup(savedFiles);
             throw pg.ConstraintName?.Contains("Email", StringComparison.OrdinalIgnoreCase) == true
                 ? new DuplicateEmailException()
                 : new DuplicateLicenseException();
         }
         catch
         {
-            Cleanup(savedFiles); // files are not part of the DB transaction
+            Cleanup(savedFiles); 
             throw;
         }
     }

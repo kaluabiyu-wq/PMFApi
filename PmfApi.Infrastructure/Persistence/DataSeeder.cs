@@ -259,17 +259,14 @@ public static class DataSeeder
 
         await SeedInventoriesAsync(context, ct);
 
-        // One-time repair for users seeded earlier with plain-text passwords.
-        // Safe to run every start-up; you can delete it once your DB is clean.
-        await HashPlainTextPasswordsAsync(context, ct);
+         await HashPlainTextPasswordsAsync(context, ct);
     }
 
     private static async Task HashPlainTextPasswordsAsync(
         PmfDbContext context,
         CancellationToken ct)
     {
-        // ASP.NET Identity v3 hashes always start with "AQAAAA".
-        var users = await context.Users
+         var users = await context.Users
             .Where(u => !u.Password.StartsWith("AQAAAA"))
             .ToListAsync(ct);
 
@@ -298,8 +295,7 @@ public static class DataSeeder
             .Take(10)
             .ToListAsync(ct);
 
-        // for the second batch of 5 pharmacies
-        var extraMedicines = await context.Medicines
+          var extraMedicines = await context.Medicines
             .OrderBy(m => m.Id)
             .Skip(10)
             .Take(15)
@@ -343,8 +339,7 @@ public static class DataSeeder
 
         var random = new Random(42);
 
-        // ── First 5 pharmacies × first 10 medicines ──
-        var firstFivePharmacies = pharmacies.Take(5).ToList();
+         var firstFivePharmacies = pharmacies.Take(5).ToList();
 
         foreach (var (pharmacy, pharmacyIndex) in
                  firstFivePharmacies.Select((p, i) => (p, i)))
@@ -370,8 +365,7 @@ public static class DataSeeder
             }
         }
 
-        // ── Next 5 pharmacies: 2 shared + 3 unique medicines each ──
-        var nextFivePharmacies = pharmacies.Skip(5).Take(5).ToList();
+         var nextFivePharmacies = pharmacies.Skip(5).Take(5).ToList();
 
         // The 2 medicines every pharmacy in this batch has in common
         var sharedMedicines = medicines.Take(2).ToList();

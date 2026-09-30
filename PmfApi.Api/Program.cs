@@ -64,9 +64,21 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<AuditLogFilter>();
-}
-
-);
+})
+.ConfigureApiBehaviorOptions(options =>
+{
+    var defaultFactory = options.InvalidModelStateResponseFactory;
+    options.InvalidModelStateResponseFactory = ctx =>
+    {
+        var errors = ctx.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .Select(e => $"{e.Key}: {string.Join("; ", e.Value!.Errors.Select(x => x.ErrorMessage))}");
+        ctx.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("Validation")
+            .LogWarning("400 validation failed on {Path} -> {Errors}", ctx.HttpContext.Request.Path, string.Join(" | ", errors));
+        return defaultFactory(ctx);
+    };
+});
 
 builder.Host.UseDefaultServiceProvider(options =>
 {

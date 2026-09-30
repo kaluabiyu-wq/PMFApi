@@ -11,7 +11,6 @@ public class LocalFileStorage(IHostEnvironment env) : IFileStorage
     private static readonly HashSet<string> AllowedExtensions =
         new(StringComparer.OrdinalIgnoreCase) { ".pdf", ".jpg", ".jpeg", ".png" };
 
-    // Outside wwwroot on purpose: these are private verification documents.
     private string Root => Path.Combine(env.ContentRootPath, "uploads");
 
     public async Task<string> SaveAsync(IFormFile file, string folder, CancellationToken ct)
