@@ -4,6 +4,8 @@ using PmfApi.Infrastructure.Persistence;
 
 using PmfApi.Application.Interfaces;
 using PmfApi.Application.Dtos;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace PmfApi.Api.Controllers;
 
@@ -16,7 +18,8 @@ namespace PmfApi.Api.Controllers;
 public class InventoryController(
     IInventoryService inventoryService,
     IPharmaciesService pharmaciesService,
-    IMedicinesService medicinesService) : ControllerBase
+    IMedicinesService medicinesService,
+    IAuthorizationService authorizationService) : ControllerBase
 {
     
     [HttpGet(Name = nameof(GetInventoryByMedicine))]
@@ -79,6 +82,58 @@ public class InventoryController(
         var result = await inventoryService.CreateAsync(pharmacyId, request, ct);
         return CreatedAtAction(nameof(GetInventoryById), new { pharmacyId, id = result.Id }, result);
     }
+    [HttpPut("{id:int}", Name = nameof(updateInventory))]
+    [ProducesResponseType(typeof(InventoryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Edit a pharmacy's stock record")]
+    [EndpointDescription("Updates Price and/or Status on one inventory row. Only fields present in the body change; omitted fields keep their stored value. Always refreshes LastUpdatedAt and records the caller as the updating user. A price change also writes an InventoryHistory row holding the old price. Requires active staff of this pharmacy (or a SystemAdmin). Returns 404 if the pharmacy does not exist or the row is not in this pharmacy.")]
+    public async Task<IActionResult> updateInventory(int pharmacyId, int id, InventoryUpdateRequest request
+    ,CancellationToken ct)
+    {
+        var (failure, userId) = await AuthorizePharmacyWriteAsync(pharmacyId,ct);
+        if(failure is not null) return failure;
+
+        var result = await inventoryService.UpdateAsync(pharmacyId,id, request,userId,ct);
+        return result is not null ? Ok(result) : NotFound();
+    }
+    [HttpDelete("{id:int}", Name = nameof(DeleteInventory))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Remove a stock record from a pharmacy")]
+    [EndpointDescription("Permanently deletes the inventory row, and with it that row's InventoryHistory entries (database cascade). Requires active staff of this pharmacy (or a SystemAdmin). Returns 404 if the pharmacy does not exist or the row is not in this pharmacy.")]
+    public async Task<IActionResult> DeleteInventory(int pharmacyId, int id,CancellationToken ct)
+    {
+        var (failure,_) = await AuthorizePharmacyWriteAsync(pharmacyId,ct);
+        if(failure is not null) return failure ;
+        var deleted = await inventoryService.DeleteAsync(pharmacyId,id,ct);
+        return deleted ? NoContent() : NotFound();
+    }
+
+    private async Task<(IActionResult? Failure, int UserId)> AuthorizePharmacyWriteAsync(int pharmacyId, CancellationToken ct)
+    {
+        var pharmacy = await pharmaciesService.GetEntityByIdAsync(pharmacyId, ct);
+        if (pharmacy is null)
+        {
+            return (NotFound(new ProblemDetails
+            {
+                Title = "Pharmacy not found",
+                Detail = $"No pharmacy exists with id {pharmacyId}.",
+                Status = StatusCodes.Status404NotFound,
+            }), 0);
+        }
+
+        var auth = await authorizationService.AuthorizeAsync(User, pharmacy, "PharmacyOwnerOrAdmin");
+        if (!auth.Succeeded) return (Forbid(), 0);
+
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+            return (Forbid(), 0);
+
+        return (null, userId);
+    }
+  
 
     private async Task<IActionResult?> CheckPharmacyExistsAsync(int pharmacyId, CancellationToken ct)
     {

@@ -2,6 +2,7 @@ namespace PmfApi.Application.Dtos;
 
 
 public sealed record PharmacyMedicineDetail(
+    int InventoryId,
     int MedicineId,
     string GenericName,
     string BrandName,

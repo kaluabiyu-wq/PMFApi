@@ -92,6 +92,7 @@ public class InventoryService(PmfDbContext context, ILogger<InventoryService> lo
             .Where(i => i.PharmacyId == pharmacyId)
             .OrderBy(i => i.Medicine.GenericName)
             .Select(i => new PharmacyMedicineDetail(
+                i.Id,
                 i.Medicine.Id,
                 i.Medicine.GenericName,
                 i.Medicine.BrandName,
@@ -208,5 +209,51 @@ public class InventoryService(PmfDbContext context, ILogger<InventoryService> lo
             .ToList();
 
         return result;
+    }
+
+ public async Task<InventoryResponse?> UpdateAsync(int pharmacyId, int id, InventoryUpdateRequest request,
+  int updatedByUserId, CancellationToken ct)
+    {
+        var inventory = await context.Inventories
+        .FirstOrDefaultAsync(i=> i.Id == id && i.PharmacyId == pharmacyId,ct);
+        
+        if (inventory is null) return null;
+
+        if(request.Price is {} newPrice && newPrice != inventory.Price)
+        {
+            context.InventoryHistories.Add(new InventoryHistory
+            {
+                InventoryId = inventory.Id,
+                MedicineId = inventory.MedicineId,
+                PharmacyId = inventory.PharmacyId,
+                OldPrice = inventory.Price,
+                UserId = updatedByUserId,
+                ChangedAt = DateTime.UtcNow
+            });
+            inventory.Price = newPrice;
+        }
+        if(request.Status is not null)
+        inventory.Status = request.Status;
+
+        inventory.UpdatebyUserId = updatedByUserId;
+        inventory.LastUpdatedAt = DateTime.UtcNow;
+
+        await context.SaveChangesAsync(ct);
+
+        logger.LogInformation("inventory {inventoryId} updated by user {UserId} in pharmacy {PharmacyId}",
+        inventory.Id,updatedByUserId,pharmacyId);
+
+        return await GetByIdAsync(inventory.Id,ct);
+    }
+ public async Task<bool> DeleteAsync(int pharmacyId, int id, CancellationToken ct)
+    {
+        var rows = await context.Inventories
+        .Where(i => i.Id == id && i.PharmacyId == pharmacyId)
+        .ExecuteDeleteAsync(ct);
+
+        if(rows > 0)
+        logger.LogInformation("inventory {inventoryId} deleted from pharmacy {PharmacyId}", id, pharmacyId);
+
+        return rows > 0;
     }
 }

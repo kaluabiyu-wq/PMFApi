@@ -18,4 +18,7 @@ public interface IInventoryService
     Task<List<PharmacyMedicineDetail>> GetMedicineDetailsByPharmacyAsync(int pharmacyId, CancellationToken ct);
 
     Task<List<MedicinePharmacyInventoryResponse>> GetAllMedicinesWithPharmaciesAsync(CancellationToken ct);
+    Task<InventoryResponse?> UpdateAsync(int pharmacyId, int id, InventoryUpdateRequest request, 
+      int updatedByUserId, CancellationToken ct);
+    Task<bool> DeleteAsync(int pharmacyId, int id, CancellationToken ct);
 }

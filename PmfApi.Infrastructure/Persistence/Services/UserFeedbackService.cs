@@ -20,6 +20,7 @@ public class UserFeedBackService(PmfDbContext context,ILogger <UserFeedBackServi
           InventoryId = request.InventoryId,
           PharmacyId = request.PharmacyId,
           WasMedicineAvailable = request.WasMedicineAvailable,
+          Comments = request.Comments,
           SubmittedAt = DateTime.UtcNow  
         };
         context.UserFeedbacks.Add(feedback);
