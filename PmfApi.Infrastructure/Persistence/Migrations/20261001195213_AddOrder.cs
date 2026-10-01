@@ -21,7 +21,8 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     PharmacyId = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,8 +50,8 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     OrderId = table.Column<int>(type: "integer", nullable: false),
                     InventoryId = table.Column<int>(type: "integer", nullable: false),
-                    Quantitiy = table.Column<int>(type: "integer", nullable: false),
-                    UintPrice = table.Column<decimal>(type: "numeric", nullable: false)
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {

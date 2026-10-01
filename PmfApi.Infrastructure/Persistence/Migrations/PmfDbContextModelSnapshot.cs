@@ -220,6 +220,9 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
@@ -249,10 +252,10 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Quantitiy")
+                    b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("UintPrice")
+                    b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");

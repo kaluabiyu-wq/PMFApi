@@ -24,7 +24,7 @@ public record OrderResponse(
     int PharmacyId,
     [property: JsonConverter(typeof(JsonStringEnumConverter))] OrderStatus Status,
     DateTime CreatedAt,
-    DateTime UpdateAt,
+    DateTime UpdatedAt,
     decimal TotalPrice,
     IReadOnlyList<OrderItemResponse> Items
 );

@@ -12,7 +12,7 @@ using PmfApi.Infrastructure.Persistence;
 namespace PmfApi.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(PmfDbContext))]
-    [Migration("20261001112135_AddOrder")]
+    [Migration("20261001195213_AddOrder")]
     partial class AddOrder
     {
         /// <inheritdoc />
@@ -223,6 +223,9 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
@@ -252,10 +255,10 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Quantitiy")
+                    b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("UintPrice")
+                    b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
