@@ -20,7 +20,8 @@ public class OrderItemService(PmfDbContext context, ILogger<OrderItemService> lo
 
         var inventory = await context.Inventories.AsNoTracking()
             .Where(i => i.Id == request.InventoryId)
-            .Select(i => new { i.PharmacyId, i.Price, MedicineIsActive = i.Medicine.IsActive })
+            .Select(i => new { i.PharmacyId, i.Price, MedicineIsActive = i.Medicine.IsActive ,
+            RequiresRx = i.Medicine.RequeiresPrescription})
             .FirstOrDefaultAsync(ct);
 
         if (inventory is null)
@@ -31,6 +32,9 @@ public class OrderItemService(PmfDbContext context, ILogger<OrderItemService> lo
 
         if (!inventory.MedicineIsActive)
             return ServiceResult<OrderResponse>.Invalid("That medicine is no longer available.");
+
+        if (inventory.RequiresRx && await HasApprovedPrescriptionAsync(orderId, ct))
+            return ServiceResult<OrderResponse>.Conflict(FrozenMessage);
 
         if (await context.OrderItems.AnyAsync(i => i.OrderId == orderId && i.InventoryId == request.InventoryId, ct))
             return ServiceResult<OrderResponse>.Conflict("That item is already in the order; update its quantity instead.");
@@ -68,7 +72,14 @@ public class OrderItemService(PmfDbContext context, ILogger<OrderItemService> lo
         if (item is null)
             return ServiceResult<OrderResponse>.NotFound($"Order {orderId} has no item {itemId}.");
 
-        // UnitPrice is NOT refreshed: the patient keeps the price they saw when the line was added.
+        var itemRequiresRx = await context.Inventories
+            .Where(i => i.Id == item.InventoryId)
+            .Select(i => i.Medicine.RequeiresPrescription)
+            .FirstAsync(ct);
+
+        if (itemRequiresRx && await HasApprovedPrescriptionAsync(orderId, ct))
+            return ServiceResult<OrderResponse>.Conflict(FrozenMessage);
+
         item.Quantity = quantity;
         await context.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
@@ -116,4 +127,10 @@ public class OrderItemService(PmfDbContext context, ILogger<OrderItemService> lo
             .Where(o => o.Id == orderId)
             .Select(OrderProjections.ToResponse)
             .FirstAsync(ct));
+    private const string FrozenMessage = "A prescription for this order has already been approved, so its prescription-only items can no longer be added or changed. Place a new order instead.";
+
+    private Task<bool> HasApprovedPrescriptionAsync(int orderId, CancellationToken ct) =>
+        context.Prescriptions.AnyAsync(p => p.OrderId == orderId && p.VerificationStatus == VerificationStatus.Approved, ct);
+
+
 }

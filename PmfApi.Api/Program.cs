@@ -49,6 +49,10 @@ builder.Services.AddScoped<IAuthorizationHandler, PharmacyOwnerHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, PharmacyDocumentReviewHandler>();
 builder.Services.AddScoped<IFileStorage,LocalFileStorage>();
 builder.Services.AddScoped<IPharmacyRegistrationService,PharmacyRegistrationService>();
+builder.Services.AddScoped<IOrderService,OrderService>();
+builder.Services.AddScoped<IOrderItemService,OrderItemService>();
+builder.Services.AddScoped<IPrescriptionService,PrescriptionService>();
+builder.Services.AddScoped<IAuthorizationHandler, PrescriptionVerificationHandler>();
 
 
 builder.Services.AddCors(options =>
@@ -102,6 +106,9 @@ builder.Services.AddAuthorization(options =>
    
     options.AddPolicy("DocumentReview", policy =>
         policy.Requirements.Add(new PharmacyDocumentReviewRequirement()));
+
+    options.AddPolicy("PrescriptionVerification", policy =>
+        policy.Requirements.Add(new PrescriptionVerificationRequirement()));
 });
  
 builder.Services.AddRateLimiter(options =>

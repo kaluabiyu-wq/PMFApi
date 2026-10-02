@@ -3,11 +3,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PmfApi.Application.Dtos;
+using PmfApi.Application.Interfaces;
 using PmfApi.Domain.Entities;
 
 namespace PmfApi.Infrastructure.Persistence.Services;
 
-public class OrderService(PmfDbContext context, ILogger<OrderService> logger)
+public class OrderService(PmfDbContext context, ILogger<OrderService> logger) :
+ IOrderService
 {
     public async Task<ServiceResult<OrderResponse>> CreateAsync(int userId, OrderRequest request,
     CancellationToken ct)
@@ -96,7 +98,12 @@ public class OrderService(PmfDbContext context, ILogger<OrderService> logger)
     {
         var row = await context.Orders.AsNoTracking()
             .Where(o => o.Id == id)
-            .Select(o => new { o.Status })
+            .Select(o => new
+            {
+                o.Status,
+                RequiresRx = o.Items.Any(i => i.Inventory.Medicine.RequeiresPrescription),
+                HasApprovedPrescription = o.Prescriptions.Any(p => p.VerificationStatus == VerificationStatus.Approved),
+            })
             .FirstOrDefaultAsync(ct);
 
         if (row is null)
@@ -107,8 +114,21 @@ public class OrderService(PmfDbContext context, ILogger<OrderService> logger)
         if (!Order.CanTransition(current, newStatus, byPharmacy))
             return ServiceResult<OrderResponse>.Conflict($"An order that is {current} cannot be moved to {newStatus} by this caller.");
 
-        var rows = await context.Orders
-            .Where(o => o.Id == id && o.Status == current)
+        if (newStatus == OrderStatus.Confirmed && row.RequiresRx && !row.HasApprovedPrescription)
+            return ServiceResult<OrderResponse>.Conflict(
+                "This order contains prescription-only medicine. It can be confirmed only after its prescription has been approved.");
+
+        
+        var target = context.Orders.Where(o => o.Id == id && o.Status == current);
+
+        if (newStatus == OrderStatus.Confirmed)
+        {
+            target = target.Where(o =>
+                !o.Items.Any(i => i.Inventory.Medicine.RequeiresPrescription)
+                || o.Prescriptions.Any(p => p.VerificationStatus == VerificationStatus.Approved));
+        }
+
+        var rows = await target
             .ExecuteUpdateAsync(s => s
                 .SetProperty(o => o.Status, newStatus)
                 .SetProperty(o => o.UpdatedAt, DateTime.UtcNow), ct);

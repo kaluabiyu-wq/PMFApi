@@ -26,5 +26,7 @@ public record OrderResponse(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     decimal TotalPrice,
-    IReadOnlyList<OrderItemResponse> Items
+    IReadOnlyList<OrderItemResponse> Items,
+    bool RequiresPrescription,
+    VerificationStatus? PrescriptionStatus
 );

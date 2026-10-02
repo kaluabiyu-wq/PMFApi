@@ -20,6 +20,7 @@ public class Order
     public User User {get;set;} = null!;
     public Pharmacy Pharmacy {get;set;} = null!;
     public ICollection<OrderItem> Items {get;set;} = new List<OrderItem>();
+    public ICollection<Prescription> Prescriptions {get;set;} = new List<Prescription>();
 
 
     public static bool CanTransition(OrderStatus from, OrderStatus to,bool byPharmacy) =>

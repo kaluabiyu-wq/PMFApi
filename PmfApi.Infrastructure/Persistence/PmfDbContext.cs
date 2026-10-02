@@ -37,6 +37,8 @@ public class PmfDbContext (DbContextOptions<PmfDbContext> options) :
 
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
+    public DbSet<Prescription> Prescriptions => Set<Prescription>();
+
 
      protected override void OnModelCreating(ModelBuilder b)
     {

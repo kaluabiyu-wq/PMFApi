@@ -25,5 +25,9 @@ internal static class OrderProjections
             i.Quantity,
             i.UnitPrice,
             i.Quantity * i.UnitPrice
-        )).ToList());
+        )).ToList(),
+        o.Items.Any(i=>i.Inventory.Medicine.RequeiresPrescription),
+        o.Prescriptions.
+        OrderByDescending(p=>p.Id).
+        Select(p => (VerificationStatus?)p.VerificationStatus).FirstOrDefault());
 }
