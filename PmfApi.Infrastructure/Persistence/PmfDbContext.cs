@@ -40,6 +40,7 @@ public class PmfDbContext (DbContextOptions<PmfDbContext> options) :
     public DbSet<Prescription> Prescriptions => Set<Prescription>();
 
     public DbSet<Alert> Alerts => Set<Alert>();
+    public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
 
 
      protected override void OnModelCreating(ModelBuilder b)
