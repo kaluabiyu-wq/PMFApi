@@ -39,6 +39,8 @@ public class PmfDbContext (DbContextOptions<PmfDbContext> options) :
 
     public DbSet<Prescription> Prescriptions => Set<Prescription>();
 
+    public DbSet<Alert> Alerts => Set<Alert>();
+
 
      protected override void OnModelCreating(ModelBuilder b)
     {
