@@ -56,6 +56,15 @@ public class PrescriptionService(PmfDbContext context, ILogger<PrescriptionServi
         try
         {
             await context.SaveChangesAsync(ct);
+            var pharmacyId = await context.Orders.AsNoTracking()
+                .Where(o => o.Id == orderId).Select(o => o.PharmacyId).FirstAsync(ct);
+
+            await AlertWriter.ForPharmacyStaffAsync(
+                context, pharmacyId, AlertEventType.PrescriptionSubmitted,
+                AlertReferenceTables.Prescriptions, prescription.Id,
+                $"A prescription for order #{orderId} was submitted and is waiting for review.", ct);
+
+            await context.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
         }
         catch (Exception ex) when (PostgresErrors.IsUniqueViolation(ex))
@@ -170,6 +179,18 @@ public class PrescriptionService(PmfDbContext context, ILogger<PrescriptionServi
         if (rows == 0)
             return ServiceResult<PrescriptionResponse>.Conflict("This prescription has already been reviewed.");
 
+        var patientUserId = await context.Orders.AsNoTracking()
+            .Where(o => o.Id == orderId).Select(o => o.UserId).FirstAsync(ct);
+
+        AlertWriter.ForUser(
+            context, patientUserId,
+            decision == VerificationStatus.Approved ? AlertEventType.PrescriptionApproved : AlertEventType.PrescriptionRejected,
+            AlertReferenceTables.Prescriptions, id,
+            decision == VerificationStatus.Approved
+                ? $"Your prescription for order #{orderId} was approved."
+                : $"Your prescription for order #{orderId} was rejected. Open it to see the reason.");
+
+        await context.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
 
         logger.LogInformation("Prescription {PrescriptionId} for Order {OrderId} {Decision} by User {ReviewerId}",

@@ -66,10 +66,21 @@ public class OrderService(PmfDbContext context, ILogger<OrderService> logger) :
 
         context.Orders.Add(order);
 
+     await using var tx = await context.Database.BeginTransactionAsync(ct);
+
+
      try
         {
             
             await context.SaveChangesAsync(ct);
+
+            await AlertWriter.ForPharmacyStaffAsync(
+                context, order.PharmacyId, AlertEventType.OrderPlaced,
+                AlertReferenceTables.Orders, order.Id,
+                $"New order #{order.Id} was placed and is waiting for confirmation.", ct);
+
+            await context.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
         }
         catch (Exception ex) when (PostgresErrors.IsForeignKeyViolation(ex))
         {
@@ -101,6 +112,9 @@ public class OrderService(PmfDbContext context, ILogger<OrderService> logger) :
             .Select(o => new
             {
                 o.Status,
+                o.UserId,
+                o.PharmacyId,
+                PharmacyName = o.Pharmacy.Name,
                 RequiresRx = o.Items.Any(i => i.Inventory.Medicine.RequeiresPrescription),
                 HasApprovedPrescription = o.Prescriptions.Any(p => p.VerificationStatus == VerificationStatus.Approved),
             })
@@ -127,6 +141,8 @@ public class OrderService(PmfDbContext context, ILogger<OrderService> logger) :
                 !o.Items.Any(i => i.Inventory.Medicine.RequeiresPrescription)
                 || o.Prescriptions.Any(p => p.VerificationStatus == VerificationStatus.Approved));
         }
+        
+        await using var tx = await context.Database.BeginTransactionAsync(ct);
 
         var rows = await target
             .ExecuteUpdateAsync(s => s
@@ -135,6 +151,28 @@ public class OrderService(PmfDbContext context, ILogger<OrderService> logger) :
 
         if (rows == 0)
             return ServiceResult<OrderResponse>.Conflict("The order was changed by someone else a moment ago. Reload it and try again.");
+
+         if (byPharmacy)
+        {
+            AlertWriter.ForUser(
+                context, row.UserId,
+                newStatus == OrderStatus.Confirmed ? AlertEventType.OrderConfirmed : AlertEventType.OrderCancelled,
+                AlertReferenceTables.Orders, id,
+                newStatus == OrderStatus.Confirmed
+                    ? $"Your order #{id} was confirmed by {row.PharmacyName}."
+                    : $"Your order #{id} was cancelled by {row.PharmacyName}.");
+        }
+        else
+        {
+            await AlertWriter.ForPharmacyStaffAsync(
+                context, row.PharmacyId, AlertEventType.OrderCancelled,
+                AlertReferenceTables.Orders, id,
+                $"Order #{id} was cancelled by the patient.", ct);
+        }
+
+        await context.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+
 
         logger.LogInformation("Order {OrderId} moved {From} -> {To} (byPharmacy: {ByPharmacy})", id, current, newStatus, byPharmacy);
 

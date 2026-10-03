@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PmfApi.Application.Interfaces;
 using PmfApi.Application.Dtos;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PmfApi.Api.Controllers;
 
@@ -58,6 +59,7 @@ public class PharmacyDocumentController(
     }
 
     [HttpPatch("{id:int}/review", Name = nameof(Review))]
+    [Authorize(Policy = "DocumentReview")]
     [ProducesResponseType(typeof(PharmacyDocumentResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]

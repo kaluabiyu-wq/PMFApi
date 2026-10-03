@@ -55,8 +55,24 @@ public class PharmacyDocumentService(PmfDbContext context, ILogger<PharmacyDocum
 
         if (document is null) return null;
 
+        var previousStatus = document.ReviewStatus;
+
         document.ReviewStatus = request.ReviewStatus;
         document.ReviewedByUserId = reviewerId;
+       
+         if (request.ReviewStatus != previousStatus && request.ReviewStatus != ReviewStatus.Pending)
+        {
+            var approved = request.ReviewStatus == ReviewStatus.Approved;
+
+            await AlertWriter.ForPharmacyStaffAsync(
+                context, document.PharmacyId,
+                approved ? AlertEventType.DocumentApproved : AlertEventType.DocumentRejected,
+                AlertReferenceTables.PharmacyDocuments, document.Id,
+                approved
+                    ? $"Your {document.DocumentType} document was approved."
+                    : $"Your {document.DocumentType} document was rejected.", ct);
+        }
+
         await context.SaveChangesAsync(ct);
 
         logger.LogInformation("Document {DocumentId} for Pharmacy {PharmacyId} reviewed by User {ReviewerId} -> {ReviewStatus}",

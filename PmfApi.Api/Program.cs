@@ -53,6 +53,8 @@ builder.Services.AddScoped<IOrderService,OrderService>();
 builder.Services.AddScoped<IOrderItemService,OrderItemService>();
 builder.Services.AddScoped<IPrescriptionService,PrescriptionService>();
 builder.Services.AddScoped<IAuthorizationHandler, PrescriptionVerificationHandler>();
+builder.Services.AddScoped<IAlertService,AlertService>();
+
 
 
 builder.Services.AddCors(options =>
