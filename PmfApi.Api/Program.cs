@@ -13,6 +13,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using PmfApi.Api.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
+using PmfApi.Api.Hubs;
+using PmfApi.Application.Abstractions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +60,12 @@ builder.Services.AddScoped<IOrderItemService,OrderItemService>();
 builder.Services.AddScoped<IPrescriptionService,PrescriptionService>();
 builder.Services.AddScoped<IAuthorizationHandler, PrescriptionVerificationHandler>();
 builder.Services.AddScoped<IAlertService,AlertService>();
+builder.Services.AddScoped<IDeviceTokenService,DeviceTokenService>();
+builder.Services.AddScoped<IPmfHubClient, SignalRPmfHubClient>();
+builder.Services.AddScoped<IPharmacyMembershipService, PharmacyMembership>();
+builder.Services.AddSignalR();
+
+
 
 
 
@@ -62,7 +74,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular", policy =>
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials());
 });
 
 builder.Services.AddProblemDetails();
@@ -92,6 +105,38 @@ builder.Host.UseDefaultServiceProvider(options =>
     options.ValidateOnBuild = true;
 });
 
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        // These must mirror what TokenService signs with. Adjust the config keys to yours.
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30)
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var token = ctx.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(token) &&
+                    ctx.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                {
+                    ctx.Token = token;
+                }
+                return Task.CompletedTask;
+            }
+        };
+    });
 
 builder.Services.AddAuthorization(options =>
 {
@@ -155,6 +200,8 @@ app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<PmfHub>("/hubs/pmf");
 
 
 

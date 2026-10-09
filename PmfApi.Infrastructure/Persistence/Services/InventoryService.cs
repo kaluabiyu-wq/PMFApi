@@ -4,10 +4,13 @@ using PmfApi.Application.Dtos;
 using PmfApi.Domain.Entities;
 using PmfApi.Application.Interfaces;
 using Microsoft.Extensions.Logging;
+using PmfApi.Application.Abstractions;
 
 namespace PmfApi.Infrastructure.Persistence.Services;
 
-public class InventoryService(PmfDbContext context, ILogger<InventoryService> logger) : IInventoryService
+public class InventoryService(PmfDbContext context,
+ ILogger<InventoryService> logger, IPmfHubClient hub
+) : IInventoryService
 {
     public Task<InventoryResponse?> GetByIdAsync(int id, CancellationToken ct) =>
         context.Inventories
@@ -40,6 +43,10 @@ public class InventoryService(PmfDbContext context, ILogger<InventoryService> lo
 
         logger.LogInformation("Inventory {InventoryId} created for Medicine {MedicineId} in Pharmacy {PharmacyId} at Price {Price}",
             inventory.Id, inventory.MedicineId, inventory.PharmacyId, inventory.Price);
+        
+         await hub.InventoryStatusChangedAsync(
+            new(inventory.Id, inventory.PharmacyId, inventory.MedicineId,
+                inventory.Status, inventory.Price, inventory.LastUpdatedAt), ct);
 
         return (await GetByIdAsync(inventory.Id, ct))!;
     }
@@ -219,6 +226,8 @@ public class InventoryService(PmfDbContext context, ILogger<InventoryService> lo
         
         if (inventory is null) return null;
 
+         var oldStatus = inventory.Status;
+
         if(request.Price is {} newPrice && newPrice != inventory.Price)
         {
             context.InventoryHistories.Add(new InventoryHistory
@@ -242,6 +251,13 @@ public class InventoryService(PmfDbContext context, ILogger<InventoryService> lo
 
         logger.LogInformation("inventory {inventoryId} updated by user {UserId} in pharmacy {PharmacyId}",
         inventory.Id,updatedByUserId,pharmacyId);
+
+         if (inventory.Status != oldStatus)     // <-- add
+        {
+            await hub.InventoryStatusChangedAsync(
+                new(inventory.Id, inventory.PharmacyId, inventory.MedicineId,
+                    inventory.Status, inventory.Price, inventory.LastUpdatedAt), ct);
+        }
 
         return await GetByIdAsync(inventory.Id,ct);
     }
