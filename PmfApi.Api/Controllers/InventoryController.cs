@@ -44,14 +44,14 @@ public class InventoryController(
     [EndpointSummary("Get an inventory record by ID")]
     [EndpointDescription("Returns a single inventory row by its own ID, scoped to the parent pharmacy. Returns 404 if the pharmacy does not exist or the inventory row is not found.")]
  
-    public async Task<IActionResult> GetInventoryById(int pharmacyId, int id, CancellationToken ct)
-    {
-        var notFound = await CheckPharmacyExistsAsync(pharmacyId, ct);
-        if (notFound is not null) return notFound;
+   public async Task<IActionResult> GetInventoryById(int pharmacyId, int id, CancellationToken ct)
+{
+    var notFound = await CheckPharmacyExistsAsync(pharmacyId, ct);
+    if (notFound is not null) return notFound;
 
-        var inventory = await inventoryService.GetByIdAsync(id, ct);
-        return inventory is not null ? Ok(inventory) : NotFound();
-    }
+    var inventory = await inventoryService.GetByPharmacyAndIdAsync(pharmacyId, id, ct);
+    return inventory is not null ? Ok(inventory) : NotFound();
+}
 
 
     [HttpGet("medicines", Name = nameof(GetMedicinesByPharmacy))]

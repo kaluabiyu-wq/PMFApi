@@ -12,6 +12,9 @@ public interface IUserFeedBackService
    Task<UserFeedBackResponse?> GetByUserIdAsync(int userId,int inventoryId,CancellationToken ct);
 
 Task<PagedResponse<UserFeedBackResponse>> GetAllAsync(PagedRequest request, CancellationToken ct);
+
+Task<PagedResponse<PharmacyFeedbackResponse>> GetByPharmacyAsync(int pharmacyId, PagedRequest request,
+     CancellationToken ct);
  
    
 }

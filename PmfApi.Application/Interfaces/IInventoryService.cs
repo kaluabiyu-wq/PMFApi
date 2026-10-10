@@ -21,4 +21,6 @@ public interface IInventoryService
     Task<InventoryResponse?> UpdateAsync(int pharmacyId, int id, InventoryUpdateRequest request, 
       int updatedByUserId, CancellationToken ct);
     Task<bool> DeleteAsync(int pharmacyId, int id, CancellationToken ct);
+
+    Task<InventoryResponse?> GetByPharmacyAndIdAsync(int pharmacyId, int id, CancellationToken ct);
 }

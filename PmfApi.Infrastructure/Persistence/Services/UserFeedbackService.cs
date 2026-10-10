@@ -82,5 +82,51 @@ public class UserFeedBackService(PmfDbContext context,ILogger <UserFeedBackServi
         };
     }
 
+    public async Task<PagedResponse<PharmacyFeedbackResponse>> GetByPharmacyAsync(
+    int pharmacyId, PagedRequest request, CancellationToken ct)
+{
+    var query =
+        from f in context.UserFeedbacks.AsNoTracking()
+        join i in context.Inventories.AsNoTracking() on f.InventoryId equals i.Id
+        where i.PharmacyId == pharmacyId
+        select new PharmacyFeedbackResponse(
+            f.Id, f.InventoryId, i.Medicine.GenericName,
+            f.WasMedicineAvailable, f.Comments, f.SubmittedAt);
+
+    if (!string.IsNullOrWhiteSpace(request.Search))
+    {
+        query = query.Where(x => x.Comments != null
+            && EF.Functions.ILike(x.Comments, $"%{request.Search}%"));
+    }
+
+    var totalCount = await query.CountAsync(ct);
+
+    IOrderedQueryable<PharmacyFeedbackResponse> sorted = request.OrderBy switch
+    {
+        "MedicineName" => request.Descending
+            ? query.OrderByDescending(x => x.MedicineName)
+            : query.OrderBy(x => x.MedicineName),
+        "WasMedicineAvailable" => request.Descending
+            ? query.OrderByDescending(x => x.WasMedicineAvailable)
+            : query.OrderBy(x => x.WasMedicineAvailable),
+        _ => request.Descending
+            ? query.OrderByDescending(x => x.SubmittedAt)
+            : query.OrderBy(x => x.SubmittedAt),
+    };
+
+    var items = await sorted
+        .Skip((request.Page - 1) * request.PageSize)
+        .Take(request.PageSize)
+        .ToListAsync(ct);
+
+    return new PagedResponse<PharmacyFeedbackResponse>
+    {
+        Items = items,
+        TotalCount = totalCount,
+        Page = request.Page,
+        PageSize = request.PageSize,
+    };
+}
+
 
 }

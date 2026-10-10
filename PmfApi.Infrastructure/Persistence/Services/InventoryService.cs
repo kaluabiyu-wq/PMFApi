@@ -272,4 +272,11 @@ public class InventoryService(PmfDbContext context,
 
         return rows > 0;
     }
+
+    public Task<InventoryResponse?> GetByPharmacyAndIdAsync(int pharmacyId, int id, CancellationToken ct) =>
+    context.Inventories
+        .AsNoTracking()
+        .Where(e => e.Id == id && e.PharmacyId == pharmacyId)
+        .Select(e => new InventoryResponse(e.Id, e.MedicineId, e.PharmacyId, e.UpdatebyUserId, e.Price, e.Status, e.LastUpdatedAt))
+        .FirstOrDefaultAsync(ct);
 }

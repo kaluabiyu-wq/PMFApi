@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using PmfApi.Application.Interfaces;
 using PmfApi.Application.Dtos;
+using Microsoft.AspNetCore.Authorization;
+using PmfApi.Api.Authorization;
 
 namespace PmfApi.Api.Controllers;
 
@@ -9,7 +11,10 @@ namespace PmfApi.Api.Controllers;
 [Tags("User Feedback")]
 [Produces("application/json")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-public class UserFeedBackController(IUserFeedBackService userFeedBackService) : ControllerBase
+public class UserFeedBackController(IUserFeedBackService userFeedBackService,
+IPharmaciesService pharmaciesService,
+    IAuthorizationService authorizationService
+) : ControllerBase
 {
     [HttpGet("{inventoryId:int}", Name = nameof(GetUserFeedbackById))]
     [ProducesResponseType(typeof(UserFeedBackResponse), StatusCodes.Status200OK)]
@@ -33,7 +38,35 @@ public class UserFeedBackController(IUserFeedBackService userFeedBackService) : 
         return CreatedAtAction(nameof(GetUserFeedbackById), new { userId, inventoryId = result.InventoryId }, result);
     }
 
-    [HttpGet("/api/feedback", Name = nameof(GetAllFeedback))]
+    [Authorize]
+    [HttpGet("/api/pharmacies/{pharmacyId:int}/feedback", Name = nameof(GetFeedbackForPharmacy))]
+    [ProducesResponseType(typeof(PagedResponse<PharmacyFeedbackResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("List the availability feedback left on this pharmacy's stock")]
+    [EndpointDescription("Active staff of this pharmacy (or a SysAdmin) only. Returns feedback on this pharmacy's own inventory rows, newest first by default.")]
+    public async Task<IActionResult> GetFeedbackForPharmacy(
+        int pharmacyId, [FromQuery] PagedRequest request, CancellationToken ct)
+    {
+        var pharmacy = await pharmaciesService.GetEntityByIdAsync(pharmacyId, ct);
+        if (pharmacy is null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Title = "Pharmacy not found",
+                Detail = $"No pharmacy exists with id {pharmacyId}.",
+                Status = StatusCodes.Status404NotFound,
+            });
+        }
+
+        var auth = await authorizationService.AuthorizeAsync(User, pharmacy, "PharmacyOwnerOrAdmin");
+        if (!auth.Succeeded) return Forbid();
+
+        return Ok(await userFeedBackService.GetByPharmacyAsync(pharmacyId, request, ct));
+    }
+
+[Authorize(Roles = RoleNames.SystemAdmin)]
+[HttpGet("/api/feedback", Name = nameof(GetAllFeedback))]
 [ProducesResponseType(typeof(PagedResponse<UserFeedBackResponse>), StatusCodes.Status200OK)]
 [EndpointSummary("List all feedback across every user and pharmacy")]
 public async Task<IActionResult> GetAllFeedback([FromQuery] PagedRequest request, CancellationToken ct)

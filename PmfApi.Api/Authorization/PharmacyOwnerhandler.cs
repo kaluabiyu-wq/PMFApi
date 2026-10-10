@@ -22,6 +22,7 @@ public class PharmacyOwnerHandler(PmfDbContext dbContext)
 
         
         if (requirement.RequireElevatedStaffRole
+            && !context.User.IsInRole(RoleNames.Pharmacy)
             && !context.User.IsInRole(RoleNames.PharmacyStaff)
             && !context.User.IsInRole(RoleNames.PharmacyAdmin))
         {

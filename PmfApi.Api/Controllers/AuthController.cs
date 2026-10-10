@@ -87,7 +87,13 @@ public async Task<ActionResult<UserProfileDto>> Me(CancellationToken ct)
         .Select(u => new UserProfileDto(
             u.FullName,
             u.LocationId,
-            u.Location != null ? u.Location.Label : null))   
+             u.Location != null ? u.Location.Label : null,
+    
+            context.PharmacyStaff
+                .Where(s => s.UserId == u.Id && s.IsActive && s.Pharmacy.IsActive)
+                .OrderBy(s => s.AssignedAt)
+                .Select(s => (int?)s.PharmacyId)
+                .FirstOrDefault()))
         .FirstOrDefaultAsync(ct);
 
     return profile is null ? NotFound() : Ok(profile);
@@ -96,5 +102,5 @@ public async Task<ActionResult<UserProfileDto>> Me(CancellationToken ct)
 
 }
 
-public record UserProfileDto(string FullName, int? LocationId, string? LocationLabel);
+public record UserProfileDto(string FullName, int? LocationId, string? LocationLabel,int? PharmacyId);
 
