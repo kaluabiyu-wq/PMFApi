@@ -1,7 +1,11 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PmfApi.Application.Dtos;
 using PmfApi.Application.Exceptions;
 using PmfApi.Application.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using PmfApi.Infrastructure.Persistence;
 
 namespace PmfApi.Api.Controllers;
 
@@ -11,7 +15,7 @@ namespace PmfApi.Api.Controllers;
 [Produces("application/json")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
 public class AuthController(IAuthService authService
-, IPharmacyRegistrationService registrationService) : ControllerBase
+, IPharmacyRegistrationService registrationService,PmfDbContext context) : ControllerBase
 {
     [HttpPost("login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
@@ -71,5 +75,26 @@ public class AuthController(IAuthService authService
             return BadRequest(new ProblemDetails { Title = "Invalid upload", Detail = ex.Message, Status = 400 });
         }
     }
+
+[Authorize]
+[HttpGet("me")]
+public async Task<ActionResult<UserProfileDto>> Me(CancellationToken ct)
+{
+    var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+    var profile = await context.Users
+        .Where(u => u.Id == userId)
+        .Select(u => new UserProfileDto(
+            u.FullName,
+            u.LocationId,
+            u.Location != null ? u.Location.Label : null))   
+        .FirstOrDefaultAsync(ct);
+
+    return profile is null ? NotFound() : Ok(profile);
 }
+
+
+}
+
+public record UserProfileDto(string FullName, int? LocationId, string? LocationLabel);
 

@@ -6,6 +6,7 @@ using PmfApi.Application.Dtos;
 using PmfApi.Domain.Entities;
 using PmfApi.Application.Interfaces;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace PmfApi.Infrastructure.Persistence.Services;
 public class LocationService(PmfDbContext context, ILogger<LocationService> logger) :
@@ -20,12 +21,20 @@ ILocationService
             l.Id, l.Label, l.Subcity, l.Woreda, l.Coordinate
         ))
         .FirstOrDefaultAsync(ct);
+
+  private Task<LocationResponse?> FindByCoordinateAsync(Coordinate coordinate, CancellationToken ct) =>
+        context.Locations.AsNoTracking()
+            .Where(l => l.Coordinate.Latitude == coordinate.Latitude
+                     && l.Coordinate.Longitude == coordinate.Longitude)
+            .Select(l => new LocationResponse(
+                l.Id, l.Label, l.Subcity, l.Woreda, l.Coordinate))
+            .FirstOrDefaultAsync(ct);
     public async Task<LocationResponse> CreateAsync(LocationRequest request, CancellationToken ct)
 {
-    var existing = await GetByCoordinateAsync(0, request.Coordinate, ct); 
+    var existing = await FindByCoordinateAsync(request.Coordinate, ct);
 
-    if (existing is not null)
-        return existing;
+        if (existing is not null)
+            return existing;
 
     var location = new Location
     {
@@ -37,10 +46,30 @@ ILocationService
     };
 
     context.Locations.Add(location);
-    await context.SaveChangesAsync(ct);
+    try
+        {
+            await context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex)
+            when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        {
+            // Another request inserted the same coordinate between our lookup and insert.
+            context.Entry(location).State = EntityState.Detached;
 
-    return new LocationResponse(location.Id, location.Label, location.Subcity, location.Woreda, location.Coordinate);
-}
+            var winner = await FindByCoordinateAsync(request.Coordinate, ct);
+            if (winner is not null)
+            {
+                logger.LogInformation(
+                    "Location insert raced at ({Lat}, {Lng}); returning existing {LocationId}.",
+                    request.Coordinate.Latitude, request.Coordinate.Longitude, winner.Id);
+                return winner;
+            }
+
+            throw;
+        }
+
+        return new LocationResponse(location.Id, location.Label, location.Subcity, location.Woreda, location.Coordinate);
+    }
 
 public async  Task<PagedResponse<LocationResponse>> GetLocationAsync(PagedRequest request, CancellationToken ct)
 {
@@ -48,7 +77,7 @@ public async  Task<PagedResponse<LocationResponse>> GetLocationAsync(PagedReques
 
     if (!string.IsNullOrWhiteSpace(request.Search))
     {
-        query = query.Where(c => EF.Functions.ILike(c.Label, "$%{request.Search}%")
+               query = query.Where(c => EF.Functions.ILike(c.Label, $"%{request.Search}%")
                                || EF.Functions.ILike(c.Subcity, $"%{request.Search}%"));
     }
 

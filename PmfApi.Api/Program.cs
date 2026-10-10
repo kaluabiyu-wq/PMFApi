@@ -62,7 +62,7 @@ builder.Services.AddScoped<IAuthorizationHandler, PrescriptionVerificationHandle
 builder.Services.AddScoped<IAlertService,AlertService>();
 builder.Services.AddScoped<IDeviceTokenService,DeviceTokenService>();
 builder.Services.AddScoped<IPmfHubClient, SignalRPmfHubClient>();
-builder.Services.AddScoped<IPharmacyMembershipService, PharmacyMembership>();
+builder.Services.AddScoped<IPharmacyMembershipService, PharmacyMembershipService>();
 builder.Services.AddSignalR();
 
 

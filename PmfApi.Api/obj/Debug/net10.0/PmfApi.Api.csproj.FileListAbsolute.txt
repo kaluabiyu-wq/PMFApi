@@ -263,3 +263,7 @@ C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.Ident
 C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Logging.dll
 C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\tarik\Desktop\Qiyas\PMFApi\PmfApi.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
