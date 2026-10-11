@@ -10,4 +10,7 @@ public sealed record PharmacyDashboardResponse(
     int OutOfStockCount,
     int FeedbackCount,
     int UnavailableReports,
-    DateTime LastInventoryUpdateAt);
+    DateTime LastInventoryUpdateAt,
+    double? AverageRating,
+    int ReviewCount,
+    int FavouritesCount);

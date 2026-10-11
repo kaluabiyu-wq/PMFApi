@@ -64,4 +64,9 @@ public class PharmacyStaffService(PmfDbContext context, ILogger<PharmacyStaffSer
 
         return await GetByPharmacyIdAsync(pharmacyId, id, ct);
     }
+
+     public Task<bool> IsAssignedAsync(int userId, int pharmacyId, CancellationToken ct) =>
+    context.PharmacyStaff.AsNoTracking()
+        .AnyAsync(ps => ps.UserId == userId && ps.PharmacyId == pharmacyId, ct);
+
 }

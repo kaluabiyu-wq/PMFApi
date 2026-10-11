@@ -1,17 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
 using PmfApi.Application.Interfaces;
 using PmfApi.Application.Dtos;
+using Microsoft.AspNetCore.Authorization;
+using PmfApi.Api.Authorization;
+using PmfApi.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace PmfApi.Api.Controllers;
 
 [ApiController]
+[Authorize(Roles = $"{RoleNames.PharmacyAdmin},{RoleNames.SystemAdmin}")]
 [Route("api/pharmacies/{pharmacyId:int}/staff")]
 [Tags("Pharmacy Staff")]
 [Produces("application/json")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
 public class PharmacyStaffController(
     IPharmacyStaffService pharmacyStaffService,
-    IPharmaciesService pharmaciesService) : ControllerBase
+    IPharmaciesService pharmaciesService,
+    PmfDbContext context) : ControllerBase
 {
     [HttpGet(Name = nameof(GetStaffByPharmacy))]
     [ProducesResponseType(typeof(IReadOnlyList<PharmacyStaffResponse>), StatusCodes.Status200OK)]
@@ -41,20 +47,31 @@ public class PharmacyStaffController(
         return staff is not null ? Ok(staff) : NotFound();
     }
 
+   
     [HttpPost(Name = nameof(CreateStaff))]
     [ProducesResponseType(typeof(PharmacyStaffResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [EndpointSummary("Authorize a user to represent a pharmacy")]
     [EndpointDescription("Creates a staff assignment linking a user to this pharmacy, with a position (e.g. Pharmacist, Cashier, Manager). Returns 404 if the pharmacy does not exist.")]
-    public async Task<IActionResult> CreateStaff(int pharmacyId, PharmacyStaffRequest request, CancellationToken ct)
-    {
-        var notFound = await CheckPharmacyExistsAsync(pharmacyId, ct);
-        if (notFound is not null) return notFound;
+   public async Task<IActionResult> CreateStaff(int pharmacyId, PharmacyStaffRequest request, CancellationToken ct)
+{
+    var notFound = await CheckPharmacyExistsAsync(pharmacyId, ct);
+    if (notFound is not null) return notFound;
 
-        var result = await pharmacyStaffService.CreateAsync(pharmacyId, request, ct);
-        return CreatedAtAction(nameof(GetStaffById), new { pharmacyId, id = result.Id }, result);
+    if (await pharmacyStaffService.IsAssignedAsync(request.UserId, pharmacyId, ct))
+    {
+        return Conflict(new ProblemDetails
+        {
+            Title = "Already assigned",
+            Detail = $"User {request.UserId} is already assigned to pharmacy {pharmacyId}.",
+            Status = StatusCodes.Status409Conflict,
+        });
     }
+
+    var result = await pharmacyStaffService.CreateAsync(pharmacyId, request, ct);
+    return CreatedAtAction(nameof(GetStaffById), new { pharmacyId, id = result.Id }, result);
+}
 
     [HttpPatch("{id:int}/deactivate", Name = nameof(Deactivate))]
     [ProducesResponseType(typeof(PharmacyStaffResponse), StatusCodes.Status200OK)]
@@ -85,4 +102,6 @@ public class PharmacyStaffController(
 
         return null;
     }
+
+
 }

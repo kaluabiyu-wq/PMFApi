@@ -40,13 +40,27 @@ public class PharmacyDashboardService(PmfDbContext context) : IPharmacyDashboard
         var feedbackCount = await feedback.CountAsync(ct);
         var unavailableReports = await feedback.CountAsync(f => !f.WasMedicineAvailable, ct);
 
-        var verification = pharmacy.IsVerified ? "approved"
-                         : pharmacy.HasRejectedDocument ? "rejected"
-                         : "pending";
+        var reviews = context.Reviews
+    .AsNoTracking()
+    .Where(r => r.PharmacyId == pharmacyId);
 
-        return new PharmacyDashboardResponse(
-            pharmacy.Id, pharmacy.Name, verification, pharmacy.ReliablityScore,
-            pharmacy.FreshnessThreshold, itemsListed, outOfStock,
-            feedbackCount, unavailableReports, pharmacy.LastInventoryUpdateAt);
+       var reviewCount = await reviews.CountAsync(ct);
+       var averageRating = await reviews
+    .Select(r => (double?)r.Rating)
+    .AverageAsync(ct);         
+
+      var verification = pharmacy.IsVerified ? "approved"
+                 : pharmacy.HasRejectedDocument ? "rejected"
+                 : "pending";
+
+     var favoritesCount = await context.Favorites
+    .CountAsync(f => f.PharmacyId == pharmacyId, ct);
+
+return new PharmacyDashboardResponse(
+    pharmacy.Id, pharmacy.Name, verification, pharmacy.ReliablityScore,
+    pharmacy.FreshnessThreshold, itemsListed, outOfStock,
+    feedbackCount, unavailableReports, pharmacy.LastInventoryUpdateAt,
+    averageRating, reviewCount,favoritesCount);
     }
+
 }

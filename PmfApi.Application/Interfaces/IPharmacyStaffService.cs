@@ -13,4 +13,6 @@ public interface IPharmacyStaffService
     Task<bool> IsAuthorizedForPharmacyAsync(int userId, int pharmacyId, CancellationToken ct);
 
     Task<PharmacyStaffResponse?> DeactivateAsync(int pharmacyId, int id, CancellationToken ct);
+
+    Task<bool> IsAssignedAsync(int userId, int pharmacyId, CancellationToken ct);
 }

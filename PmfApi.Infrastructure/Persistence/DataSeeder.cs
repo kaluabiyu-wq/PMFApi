@@ -118,6 +118,16 @@ public static class DataSeeder
         ("System Administrator", "admin@pmf.et", "SysAdmin", 1),
     ];
 
+    
+    private static readonly (string UserEmail, string PharmacyEmail, string Position)[] StaffLinks =
+    [
+        ("abel.kebede@kenemapharmacy.et", "info@kenemapharmacy.et", "Owner"),
+        ("meklit.fikru@tikuranbessa.et", "info@tikuranbessa.et", "Owner"),
+        ("nathnael.wolde@zewditupharmacy.et", "info@zewditupharmacy.et", "Owner"),
+        ("ruth.assefa@bolefenta.et", "info@bolefenta.et", "Owner"),
+        ("kalkidan.mulu@addiscure.et", "info@addiscure.et", "Owner"),
+    ];
+
     private static readonly decimal[] BasePrices =
     [
         45m, 120m, 60m, 95m, 70m,
@@ -259,6 +269,10 @@ public static class DataSeeder
 
         await SeedInventoriesAsync(context, ct);
 
+        // Runs every time and skips links that already exist, so it also repairs a database
+        // that was seeded before this step existed (the block above only runs on an empty one).
+        await SeedPharmacyStaffAsync(context, ct);
+
         await HashPlainTextPasswordsAsync(context, ct);
     }
 
@@ -295,6 +309,44 @@ public static class DataSeeder
             {
                 role.Description = description;
             }
+        }
+
+        await context.SaveChangesAsync(ct);
+    }
+
+    private static async Task SeedPharmacyStaffAsync(
+        PmfDbContext context,
+        CancellationToken ct)
+    {
+        foreach (var (userEmail, pharmacyEmail, position) in StaffLinks)
+        {
+            var user = await context.Users
+                .FirstOrDefaultAsync(u => u.Email == userEmail, ct);
+
+            var pharmacy = await context.Pharmacies
+                .FirstOrDefaultAsync(p => p.Email == pharmacyEmail, ct);
+
+            // Skip quietly if either side was deleted or renamed in this database.
+            if (user is null || pharmacy is null)
+            {
+                continue;
+            }
+
+            var alreadyLinked = await context.PharmacyStaff
+                .AnyAsync(s => s.UserId == user.Id && s.PharmacyId == pharmacy.Id, ct);
+
+            if (alreadyLinked)
+            {
+                continue;
+            }
+
+            context.PharmacyStaff.Add(new PharmacyStaff
+            {
+                UserId = user.Id,
+                PharmacyId = pharmacy.Id,
+                Position = position,
+                IsActive = true
+            });
         }
 
         await context.SaveChangesAsync(ct);
