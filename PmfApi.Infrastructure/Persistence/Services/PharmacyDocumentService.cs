@@ -63,6 +63,7 @@ public class PharmacyDocumentService(PmfDbContext context, ILogger<PharmacyDocum
          if (request.ReviewStatus != previousStatus && request.ReviewStatus != ReviewStatus.Pending)
         {
             var approved = request.ReviewStatus == ReviewStatus.Approved;
+            var reason = request.Reason?.Trim();
 
             await AlertWriter.ForPharmacyStaffAsync(
                 context, document.PharmacyId,
@@ -70,7 +71,9 @@ public class PharmacyDocumentService(PmfDbContext context, ILogger<PharmacyDocum
                 AlertReferenceTables.PharmacyDocuments, document.Id,
                 approved
                     ? $"Your {document.DocumentType} document was approved."
-                    : $"Your {document.DocumentType} document was rejected.", ct);
+                    : string.IsNullOrEmpty(reason)
+                        ? $"Your {document.DocumentType} document was rejected."
+                        : $"Your {document.DocumentType} document was rejected: {reason}", ct);
         }
 
         await context.SaveChangesAsync(ct);

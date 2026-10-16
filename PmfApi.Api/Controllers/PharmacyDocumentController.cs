@@ -3,6 +3,8 @@ using PmfApi.Application.Interfaces;
 using PmfApi.Application.Dtos;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.StaticFiles;
+using PmfApi.Domain.Entities;
 
 namespace PmfApi.Api.Controllers;
 
@@ -13,8 +15,12 @@ namespace PmfApi.Api.Controllers;
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
 public class PharmacyDocumentController(
     IPharmacyDocumentService pharmacyDocumentService,
-    IPharmaciesService pharmaciesService) : ControllerBase
+    IPharmaciesService pharmaciesService,
+    IAuthorizationService authorizationService,
+    IFileStorage fileStorage) : ControllerBase
 {
+    private static readonly FileExtensionContentTypeProvider ContentTypes = new();
+
     [HttpGet(Name = nameof(GetDocumentsByPharmacy))]
     [ProducesResponseType(typeof(IReadOnlyList<PharmacyDocumentResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -43,6 +49,51 @@ public class PharmacyDocumentController(
         return document is not null ? Ok(document) : NotFound();
     }
 
+    [HttpGet("{id:int}/file", Name = nameof(GetDocumentFile))]
+    [Authorize]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK, "application/pdf", "image/jpeg", "image/png")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Download an uploaded verification document")]
+    [EndpointDescription("Streams the photo or PDF the pharmacy uploaded. Visible to active staff of that pharmacy and to a SystemAdmin; anyone else gets 404. Returns 404 for a document that was added as a link, since nothing is stored here for those.")]
+    public async Task<IActionResult> GetDocumentFile(int pharmacyId, int id, CancellationToken ct)
+    {
+        var pharmacy = await pharmaciesService.GetEntityByIdAsync(pharmacyId, ct);
+        if (pharmacy is null) return PharmacyNotFound(pharmacyId);
+
+        // Same rule as the prescription files: strangers can't tell the pharmacy exists.
+        var auth = await authorizationService.AuthorizeAsync(User, pharmacy, "PharmacyOwnerOrAdmin");
+        if (!auth.Succeeded) return PharmacyNotFound(pharmacyId);
+
+        var document = await pharmacyDocumentService.GetByPharmacyIdAsync(pharmacyId, id, ct);
+        if (document is null) return NotFound();
+
+        var isLink = document.FileUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || document.FileUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+        if (isLink)
+            return NotFound(new ProblemDetails
+            {
+                Title = "No stored file",
+                Detail = "This document was added as a link, so there is no uploaded file to download.",
+                Status = StatusCodes.Status404NotFound,
+            });
+
+        var stream = fileStorage.OpenRead(document.FileUrl);
+        if (stream is null)
+            return NotFound(new ProblemDetails
+            {
+                Title = "File not found",
+                Detail = "The uploaded file is no longer available.",
+                Status = StatusCodes.Status404NotFound,
+            });
+
+        if (!ContentTypes.TryGetContentType(document.FileUrl, out var contentType))
+            contentType = "application/octet-stream";
+
+        // Licences and credentials: never let a browser or proxy keep a copy.
+        Response.Headers["Cache-Control"] = "private, no-store";
+        return File(stream, contentType);
+    }
+
     [HttpPost(Name = nameof(CreateDocument))]
     [ProducesResponseType(typeof(PharmacyDocumentResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -64,16 +115,32 @@ public class PharmacyDocumentController(
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [EndpointSummary("Approve or reject a pharmacy's document")]
-    [EndpointDescription("Records the SystemAdmin who reviewed the document and sets ReviewStatus to Approved or Rejected. Returns 404 if the pharmacy or the document does not exist.")]
+    [EndpointDescription("Records the SystemAdmin who reviewed the document and sets ReviewStatus to Approved or Rejected. A Reason is required when rejecting and is sent to the pharmacy's staff as an alert. Returns 404 if the pharmacy or the document does not exist.")]
     public async Task<IActionResult> Review(int pharmacyId, int id, PharmacyDocumentReviewRequest request, CancellationToken ct)
     {
         var notFound = await CheckPharmacyExistsAsync(pharmacyId, ct);
         if (notFound is not null) return notFound;
+
+        // The pharmacy can only fix what it is told is wrong, so a rejection must say why.
+        if (request.ReviewStatus == ReviewStatus.Rejected && string.IsNullOrWhiteSpace(request.Reason))
+        {
+            ModelState.AddModelError(nameof(request.Reason), "Tell the pharmacy why the document was rejected.");
+            return ValidationProblem(ModelState);
+        }
+
         var reviewerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         var result = await pharmacyDocumentService.ReviewAsync(pharmacyId, id, reviewerId, request, ct);
         return result is not null ? Ok(result) : NotFound();
     }
+
+    private NotFoundObjectResult PharmacyNotFound(int pharmacyId) =>
+        NotFound(new ProblemDetails
+        {
+            Title = "Pharmacy not found",
+            Detail = $"No pharmacy exists with id {pharmacyId}.",
+            Status = StatusCodes.Status404NotFound,
+        });
 
     private async Task<IActionResult?> CheckPharmacyExistsAsync(int pharmacyId, CancellationToken ct)
     {
