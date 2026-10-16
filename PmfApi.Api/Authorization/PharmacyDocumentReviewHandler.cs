@@ -9,7 +9,9 @@ public class PharmacyDocumentReviewHandler
         AuthorizationHandlerContext context,
         PharmacyDocumentReviewRequirement requirement)
     {
-        if (context.User.IsInRole(RoleNames.SystemAdmin))
+        
+        if (context.User.IsInRole(RoleNames.SystemAdmin)
+            || context.User.IsInRole(RoleNames.PharmacyAdmin))
         {
             context.Succeed(requirement);
         }

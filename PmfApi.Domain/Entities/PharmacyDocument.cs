@@ -1,10 +1,14 @@
+using System.Text.Json.Serialization;
+
 namespace PmfApi.Domain.Entities;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DocumentType
 {
     License,BusinessRegistration,PharmacistCredential
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ReviewStatus
 {
     Pending,Approved,Rejected

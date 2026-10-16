@@ -52,17 +52,26 @@ public class PharmacyDocumentController(
     [HttpGet("{id:int}/file", Name = nameof(GetDocumentFile))]
     [Authorize]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK, "application/pdf", "image/jpeg", "image/png")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [EndpointSummary("Download an uploaded verification document")]
-    [EndpointDescription("Streams the photo or PDF the pharmacy uploaded. Visible to active staff of that pharmacy and to a SystemAdmin; anyone else gets 404. Returns 404 for a document that was added as a link, since nothing is stored here for those.")]
+    [EndpointDescription("Streams the photo or PDF the pharmacy uploaded. Visible to active staff of that pharmacy and to administrators (SysAdmin, PharmacyAdmin); anyone else gets 403. Returns 404 for a document that was added as a link, since nothing is stored here for those.")]
     public async Task<IActionResult> GetDocumentFile(int pharmacyId, int id, CancellationToken ct)
     {
         var pharmacy = await pharmaciesService.GetEntityByIdAsync(pharmacyId, ct);
         if (pharmacy is null) return PharmacyNotFound(pharmacyId);
 
-        // Same rule as the prescription files: strangers can't tell the pharmacy exists.
-        var auth = await authorizationService.AuthorizeAsync(User, pharmacy, "PharmacyOwnerOrAdmin");
-        if (!auth.Succeeded) return PharmacyNotFound(pharmacyId);
+        // Allowed: platform admins (SysAdmin / PharmacyAdmin, the DocumentReview policy)
+        // or active staff of this particular pharmacy.
+        var isReviewer = (await authorizationService.AuthorizeAsync(User, "DocumentReview")).Succeeded;
+        var isOwnStaff = (await authorizationService.AuthorizeAsync(User, pharmacy, "PharmacyOwnerOrAdmin")).Succeeded;
+        if (!isReviewer && !isOwnStaff)
+            return StatusCode(StatusCodes.Status403Forbidden, new ProblemDetails
+            {
+                Title = "Access denied",
+                Detail = "Only this pharmacy's staff or an administrator can view its documents.",
+                Status = StatusCodes.Status403Forbidden,
+            });
 
         var document = await pharmacyDocumentService.GetByPharmacyIdAsync(pharmacyId, id, ct);
         if (document is null) return NotFound();
@@ -115,7 +124,7 @@ public class PharmacyDocumentController(
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [EndpointSummary("Approve or reject a pharmacy's document")]
-    [EndpointDescription("Records the SystemAdmin who reviewed the document and sets ReviewStatus to Approved or Rejected. A Reason is required when rejecting and is sent to the pharmacy's staff as an alert. Returns 404 if the pharmacy or the document does not exist.")]
+    [EndpointDescription("Records the administrator (SysAdmin or PharmacyAdmin) who reviewed the document and sets ReviewStatus to Approved or Rejected. A Reason is required when rejecting and is sent to the pharmacy's staff as an alert. Returns 404 if the pharmacy or the document does not exist.")]
     public async Task<IActionResult> Review(int pharmacyId, int id, PharmacyDocumentReviewRequest request, CancellationToken ct)
     {
         var notFound = await CheckPharmacyExistsAsync(pharmacyId, ct);
