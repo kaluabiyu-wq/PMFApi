@@ -1,16 +1,13 @@
-
-
 namespace PmfApi.Application.Dtos;
 
 
 public record PharmaciesScheduleRequest
 {
-    
-    public required int PharmacyId {get;init;}
+    public required int DayOfWeek { get; init; }
 
-    public required int DayOfWeek {get;init;}
+    public bool IsClosed { get; init; }
 
-    public DateTime OpenTime {get;init;} = DateTime.UtcNow;
-    public DateTime ClosedTime {get;init;} = DateTime.UtcNow;
+    public string OpenTime { get; init; } = "08:00";
 
+    public string ClosedTime { get; init; } = "20:00";
 }

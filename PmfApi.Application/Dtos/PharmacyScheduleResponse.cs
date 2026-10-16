@@ -8,7 +8,7 @@ public record PharmacyScheduleResponse
     int Id,
     int PharmacyId,
     int DayOfWeek,
-    DateTime OpenTime,
-    DateTime ClosedTime,
+    string OpenTime,
+    string ClosedTime,
     bool IsClosed
 );
