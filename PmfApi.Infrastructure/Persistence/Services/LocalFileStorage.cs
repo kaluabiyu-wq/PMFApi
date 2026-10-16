@@ -34,4 +34,16 @@ public class LocalFileStorage(IHostEnvironment env) : IFileStorage
         var full = Path.Combine(Root, relativePath);
         if (File.Exists(full)) File.Delete(full);
     }
+
+    public Stream? OpenRead(string relativePath)
+    {
+        var root = Path.GetFullPath(Root) + Path.DirectorySeparatorChar;
+        var full = Path.GetFullPath(Path.Combine(Root, relativePath));
+
+        // Never read outside the uploads folder, whatever the stored value says.
+        if (!full.StartsWith(root, StringComparison.Ordinal) || !File.Exists(full))
+            return null;
+
+        return new FileStream(full, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
+    }
 }

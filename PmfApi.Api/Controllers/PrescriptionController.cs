@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using PmfApi.Application.Dtos;
+using PmfApi.Application.Exceptions;
 using PmfApi.Application.Interfaces;
 using PmfApi.Domain.Entities;
 
@@ -18,8 +20,11 @@ public class PrescriptionController(
     IPrescriptionService prescriptionService,
     IOrderService orderService,
     IPharmaciesService pharmaciesService,
-    IAuthorizationService authorizationService) : ControllerBase
+    IAuthorizationService authorizationService,
+    IFileStorage fileStorage) : ControllerBase
 {
+    private static readonly FileExtensionContentTypeProvider ContentTypes = new();
+
     // ───────────── Patient side ─────────────
 
     [HttpPost("orders/{orderId:int}/prescriptions", Name = nameof(SubmitPrescription))]
@@ -35,6 +40,54 @@ public class PrescriptionController(
 
         var result = await prescriptionService.CreateAsync(orderId, userId, request, ct);
         return ToResult(result, p => CreatedAtAction(nameof(GetPrescriptionById), new { id = p.Id }, p));
+    }
+
+    [HttpPost("orders/{orderId:int}/prescriptions/upload", Name = nameof(UploadPrescription))]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(6 * 1024 * 1024)]
+    [ProducesResponseType(typeof(PrescriptionResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [EndpointSummary("Upload a prescription photo or PDF for an order")]
+    [EndpointDescription("Same rules as submitting a prescription link, but the patient sends the file itself (.pdf, .jpg, .jpeg or .png, up to 5 MB) as multipart/form-data in the 'File' field. The file is stored privately and can only be read back through GET prescriptions/{id}/file by the order's patient or the pharmacy's staff. Someone else's order is reported as 404.")]
+    public async Task<IActionResult> UploadPrescription(int orderId, [FromForm] PrescriptionUploadRequest request, CancellationToken ct)
+    {
+        if (CurrentUserId is not { } userId) return Unauthorized();
+
+        // Reject strangers before anything is written to disk.
+        var order = await orderService.GetByIdAsync(orderId, ct);
+        if (order is null || order.UserId != userId) return OrderNotFound(orderId);
+
+        string storedPath;
+        try
+        {
+            storedPath = await fileStorage.SaveAsync(request.File, "prescriptions", ct);
+        }
+        catch (InvalidUploadException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid upload",
+                Detail = ex.Message,
+                Status = StatusCodes.Status400BadRequest,
+            });
+        }
+
+        try
+        {
+            var result = await prescriptionService.CreateFromUploadAsync(orderId, userId, storedPath, ct);
+
+            // The order rules said no (already approved, not Pending, ...): don't keep the file.
+            if (!result.IsSuccess) fileStorage.Delete(storedPath);
+
+            return ToResult(result, p => CreatedAtAction(nameof(GetPrescriptionById), new { id = p.Id }, p));
+        }
+        catch
+        {
+            fileStorage.Delete(storedPath);
+            throw;
+        }
     }
 
     [HttpGet("orders/{orderId:int}/prescriptions", Name = nameof(GetOrderPrescriptions))]
@@ -68,6 +121,46 @@ public class PrescriptionController(
         if (!isPatient && !await CanVerifyAsync(entity)) return PrescriptionNotFound(id);
 
         return Ok(await prescriptionService.GetByIdAsync(id, ct));
+    }
+
+    [HttpGet("prescriptions/{id:int}/file", Name = nameof(GetPrescriptionFile))]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK, "application/pdf", "image/jpeg", "image/png")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Download an uploaded prescription file")]
+    [EndpointDescription("Streams the photo or PDF the patient uploaded. Visible to the patient who submitted it and to anyone who passes the PrescriptionVerification policy for it; anyone else gets 404. Returns 404 for a prescription that was submitted as a link, since nothing is stored here for those.")]
+    public async Task<IActionResult> GetPrescriptionFile(int id, CancellationToken ct)
+    {
+        var entity = await prescriptionService.GetEntityByIdAsync(id, ct);
+        if (entity is null) return PrescriptionNotFound(id);
+
+        var isPatient = CurrentUserId == entity.Order.UserId;
+        if (!isPatient && !await CanVerifyAsync(entity)) return PrescriptionNotFound(id);
+
+        var isLink = entity.FileUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || entity.FileUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+        if (isLink)
+            return NotFound(new ProblemDetails
+            {
+                Title = "No stored file",
+                Detail = "This prescription was submitted as a link, so there is no uploaded file to download.",
+                Status = StatusCodes.Status404NotFound,
+            });
+
+        var stream = fileStorage.OpenRead(entity.FileUrl);
+        if (stream is null)
+            return NotFound(new ProblemDetails
+            {
+                Title = "File not found",
+                Detail = "The uploaded file is no longer available.",
+                Status = StatusCodes.Status404NotFound,
+            });
+
+        if (!ContentTypes.TryGetContentType(entity.FileUrl, out var contentType))
+            contentType = "application/octet-stream";
+
+        // Medical documents: never let a browser or proxy keep a copy.
+        Response.Headers["Cache-Control"] = "private, no-store";
+        return File(stream, contentType);
     }
 
     // ───────────── Pharmacy side (PrescriptionVerificationRequirement handler) ─────────────

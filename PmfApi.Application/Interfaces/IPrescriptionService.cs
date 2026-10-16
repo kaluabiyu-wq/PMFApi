@@ -8,6 +8,10 @@ public interface IPrescriptionService
    
     Task<ServiceResult<PrescriptionResponse>> CreateAsync(int orderId, int userId, PrescriptionRequest request, CancellationToken ct);
 
+    /// <summary>Same rules as <see cref="CreateAsync"/>, but the prescription is a file this API
+    /// already stored; <paramref name="storedPath"/> is the relative path returned by IFileStorage.</summary>
+    Task<ServiceResult<PrescriptionResponse>> CreateFromUploadAsync(int orderId, int userId, string storedPath, CancellationToken ct);
+
     Task<PrescriptionResponse?> GetByIdAsync(int id, CancellationToken ct);
 
    

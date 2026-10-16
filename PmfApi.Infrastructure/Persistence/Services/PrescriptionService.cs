@@ -16,6 +16,17 @@ public class PrescriptionService(PmfDbContext context, ILogger<PrescriptionServi
             || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
             return ServiceResult<PrescriptionResponse>.Invalid("FileUrl must be an absolute http or https URL.");
 
+        return await CreateCoreAsync(orderId, userId, request.FileUrl, ct);
+    }
+
+    public Task<ServiceResult<PrescriptionResponse>> CreateFromUploadAsync(int orderId, int userId,
+     string storedPath, CancellationToken ct) =>
+        CreateCoreAsync(orderId, userId, storedPath, ct);
+
+    // Shared by link and upload submissions: the order rules are identical, only FileUrl differs.
+    private async Task<ServiceResult<PrescriptionResponse>> CreateCoreAsync(int orderId, int userId,
+     string fileUrl, CancellationToken ct)
+    {
         await using var tx = await context.Database.BeginTransactionAsync(ct);
 
         
@@ -46,7 +57,7 @@ public class PrescriptionService(PmfDbContext context, ILogger<PrescriptionServi
         var prescription = new Prescription
         {
             OrderId = orderId,
-            FileUrl = request.FileUrl,
+            FileUrl = fileUrl,
             SubmittedAt = DateTime.UtcNow,
             VerificationStatus = VerificationStatus.Pending,
         };
