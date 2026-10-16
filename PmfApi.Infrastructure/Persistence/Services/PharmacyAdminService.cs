@@ -190,7 +190,8 @@ public class PharmacyAdminService(PmfDbContext context, ILogger<PharmacyAdminSer
         .Where(p => p.Id == id)
         .Select(p => new PharmacyResponse(
             p.Id, p.Name, p.LicenceNumber, p.LocationId, p.IsVerified,
-            p.ReliablityScore, p.FreshnessThreshold, p.LastInventoryUpdateAt, p.RegisteredAt
+            p.ReliablityScore, p.FreshnessThreshold, p.LastInventoryUpdateAt, p.RegisteredAt,
+            p.PhoneNumber, p.Email, p.IsActive
         )).FirstOrDefaultAsync(ct);
 
     private static string ComputeFreshnessStatus(DateTime lastInventoryUpdateAt, int freshnessThresholdHours) =>

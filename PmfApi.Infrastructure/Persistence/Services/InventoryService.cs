@@ -39,6 +39,7 @@ public class InventoryService(PmfDbContext context,
         };
 
         context.Inventories.Add(inventory);
+        await TouchPharmacyAsync(pharmacyId, inventory.LastUpdatedAt, ct);
         await context.SaveChangesAsync(ct);
 
         logger.LogInformation("Inventory {InventoryId} created for Medicine {MedicineId} in Pharmacy {PharmacyId} at Price {Price}",
@@ -246,6 +247,7 @@ public class InventoryService(PmfDbContext context,
 
         inventory.UpdatebyUserId = updatedByUserId;
         inventory.LastUpdatedAt = DateTime.UtcNow;
+        await TouchPharmacyAsync(pharmacyId, inventory.LastUpdatedAt, ct);
 
         await context.SaveChangesAsync(ct);
 
@@ -267,8 +269,13 @@ public class InventoryService(PmfDbContext context,
         .Where(i => i.Id == id && i.PharmacyId == pharmacyId)
         .ExecuteDeleteAsync(ct);
 
-        if(rows > 0)
-        logger.LogInformation("inventory {inventoryId} deleted from pharmacy {PharmacyId}", id, pharmacyId);
+        if (rows > 0)
+        {
+            await context.Pharmacies
+                .Where(p => p.Id == pharmacyId)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.LastInventoryUpdateAt, DateTime.UtcNow), ct);
+            logger.LogInformation("inventory {inventoryId} deleted from pharmacy {PharmacyId}", id, pharmacyId);
+        }
 
         return rows > 0;
     }
@@ -279,4 +286,12 @@ public class InventoryService(PmfDbContext context,
         .Where(e => e.Id == id && e.PharmacyId == pharmacyId)
         .Select(e => new InventoryResponse(e.Id, e.MedicineId, e.PharmacyId, e.UpdatebyUserId, e.Price, e.Status, e.LastUpdatedAt))
         .FirstOrDefaultAsync(ct);
+
+    
+    private async Task TouchPharmacyAsync(int pharmacyId, DateTime at, CancellationToken ct)
+    {
+        var pharmacy = await context.Pharmacies.FirstOrDefaultAsync(p => p.Id == pharmacyId, ct);
+        if (pharmacy is not null && at > pharmacy.LastInventoryUpdateAt)
+            pharmacy.LastInventoryUpdateAt = at;
+    }
 }

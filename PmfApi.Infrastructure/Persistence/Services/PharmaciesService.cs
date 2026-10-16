@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using PmfApi.Infrastructure.Persistence;
 using PmfApi.Application.Dtos;
@@ -18,7 +17,8 @@ public class PharamaciesSerivce(PmfDbContext context, ILogger<PharamaciesSerivce
     .Select(p => new PharmacyResponse (
         p.Id,p.Name,p.LicenceNumber,p.LocationId,p.IsVerified,
         p.ReliablityScore,p.FreshnessThreshold,
-        p.LastInventoryUpdateAt,p.RegisteredAt
+        p.LastInventoryUpdateAt,p.RegisteredAt,
+        p.PhoneNumber,p.Email,p.IsActive
 
     )).FirstOrDefaultAsync(ct);
 
@@ -78,7 +78,8 @@ public async Task<PagedResponse<PharmacyResponse>> GetPharmacyAsync(PagedRequest
         .Take(request.PageSize)
         .Select(c => new PharmacyResponse(c.Id, c.Name, c.LicenceNumber,
         c.LocationId,c.IsVerified,c.ReliablityScore,
-        c.FreshnessThreshold,c.LastInventoryUpdateAt,c.RegisteredAt))
+        c.FreshnessThreshold,c.LastInventoryUpdateAt,c.RegisteredAt,
+        c.PhoneNumber,c.Email,c.IsActive))
         .ToListAsync(ct);
 
     return new PagedResponse<PharmacyResponse>

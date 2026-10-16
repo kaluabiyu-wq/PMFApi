@@ -14,5 +14,8 @@ public record PharmacyResponse
     decimal ReliablityScore,
     int FreshnessThreshold,
     DateTime LastInventoryUpdatedAt,
-    DateTime RegisteredAt 
+    DateTime RegisteredAt,
+    int PhoneNumber = 0,
+    string? Email = null,
+    bool IsActive = true
 );
