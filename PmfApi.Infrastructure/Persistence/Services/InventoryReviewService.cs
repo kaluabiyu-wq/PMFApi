@@ -12,25 +12,27 @@ public class InventoryReviewService(
     ILogger<InventoryReviewService> logger,
     IPmfHubClient hub) : IInventoryReviewService
 {
-    public Task<List<InventorySubmissionResponse>> GetPharmacySubmissionsAsync(int pharmacyId, CancellationToken ct) =>
-        Project(context.Inventories
-                .AsNoTracking()
-                .Where(i => i.PharmacyId == pharmacyId && i.ApprovalStatus != InventoryApprovalStatus.Approved))
-            .OrderByDescending(i => i.LastUpdatedAt)
-            .ToListAsync(ct);
+   public Task<List<InventorySubmissionResponse>> GetPharmacySubmissionsAsync(int pharmacyId, CancellationToken ct) =>
+    Project(context.Inventories
+            .AsNoTracking()
+            .Where(i => i.PharmacyId == pharmacyId && i.ApprovalStatus != InventoryApprovalStatus.Approved)
+            .OrderByDescending(i => i.LastUpdatedAt))
+        .ToListAsync(ct);
 
-    public Task<List<InventorySubmissionResponse>> GetSubmissionsAsync(string? approvalStatus, CancellationToken ct)
-    {
-        IQueryable<Inventory> query = context.Inventories.AsNoTracking();
+public Task<List<InventorySubmissionResponse>> GetSubmissionsAsync(string? approvalStatus, CancellationToken ct)
+{
+    IQueryable<Inventory> query = context.Inventories.AsNoTracking();
 
-        if (InventoryApprovalStatus.IsValid(approvalStatus))
-            query = query.Where(i => i.ApprovalStatus == approvalStatus);
+    if (InventoryApprovalStatus.IsValid(approvalStatus))
+        query = query.Where(i => i.ApprovalStatus == approvalStatus);
 
-        var projected = Project(query);
-        return approvalStatus == InventoryApprovalStatus.Pending
-            ? projected.OrderBy(i => i.LastUpdatedAt).ToListAsync(ct)
-            : projected.OrderByDescending(i => i.LastUpdatedAt).ToListAsync(ct);
-    }
+   
+    query = approvalStatus == InventoryApprovalStatus.Pending
+        ? query.OrderBy(i => i.LastUpdatedAt)
+        : query.OrderByDescending(i => i.LastUpdatedAt);
+
+    return Project(query).ToListAsync(ct);
+}
 
     public async Task<ReviewResult> ApproveAsync(int inventoryId, int reviewerUserId, CancellationToken ct)
     {

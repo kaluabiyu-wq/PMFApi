@@ -39,6 +39,7 @@ builder.Services.AddScoped<ILocationService,LocationService>();
 builder.Services.AddScoped<IPharmaciesScheduleService,PharmaciesScheduleService>();
 builder.Services.AddScoped<IInventoryService,InventoryService>();
 builder.Services.AddScoped<IInventoryHistoryService,InventoryHistoryService>();
+builder.Services.AddScoped<IInventoryReviewService, InventoryReviewService>();
 builder.Services.AddScoped<IUserFeedBackService,UserFeedBackService>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<IRoleService,RoleService>();
