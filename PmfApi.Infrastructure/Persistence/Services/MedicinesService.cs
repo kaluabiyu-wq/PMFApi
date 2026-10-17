@@ -25,8 +25,11 @@ public class MedicinesService(PmfDbContext context, ILogger<MedicinesService> lo
     {
         var medicine = new Medicine
         {
-            GenericName = request.GenericName,
-            BrandName = request.BrandName,
+            GenericName = request.GenericName.Trim(),
+            BrandName = request.BrandName.Trim(),
+            Category = request.Category,
+            DosageForm = request.DosageForm,
+            Strength = request.Strength,
             RequeiresPrescription = request.RequiresPrescription
         };
         context.Medicines.Add(medicine);
@@ -42,7 +45,7 @@ public async Task<PagedResponse<MedicineResponse>> GetMedicineAsync(PagedRequest
 
     if (!string.IsNullOrWhiteSpace(request.Search))
     {
-        query = query.Where(c => EF.Functions.ILike(c.GenericName, "$%{request.Search}%")
+        query = query.Where(c => EF.Functions.ILike(c.GenericName, $"%{request.Search}%")
                                || EF.Functions.ILike(c.BrandName, $"%{request.Search}%"));
     }
 

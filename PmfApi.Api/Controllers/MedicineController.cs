@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PmfApi.Infrastructure.Persistence;
 using PmfApi.Application.Interfaces;
@@ -27,10 +28,13 @@ public class MedicineController(IMedicinesService medicinesService) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "PharmacyAdmin,SystemAdmin")]
     [ProducesResponseType(typeof(MedicineResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [EndpointSummary("Add a medicine to the catalogue")]
-    [EndpointDescription("Creates a new medicine catalogue entry (generic name, brand name, category, dosage form).")]
+    [EndpointDescription("Creates a new medicine catalogue entry (generic name, brand name, category, dosage form, strength). Restricted to PharmacyAdmin / SystemAdmin. A medicine has no price: each pharmacy sets its own price when it adds the medicine to its inventory.")]
     public async Task<IActionResult> Create(MedicineRequest request, CancellationToken ct)
     {
         var result = await medicinesService.CreateAsync(request, ct);

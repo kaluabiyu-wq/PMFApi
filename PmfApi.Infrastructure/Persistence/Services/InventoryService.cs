@@ -35,19 +35,15 @@ public class InventoryService(PmfDbContext context,
             Price = request.Price,
             Status = request.Status,
             UpdatebyUserId = request.UpdatebyUserId,
-            LastUpdatedAt = DateTime.UtcNow
+            LastUpdatedAt = DateTime.UtcNow,
+            ApprovalStatus = InventoryApprovalStatus.Pending
         };
 
         context.Inventories.Add(inventory);
-        await TouchPharmacyAsync(pharmacyId, inventory.LastUpdatedAt, ct);
         await context.SaveChangesAsync(ct);
 
-        logger.LogInformation("Inventory {InventoryId} created for Medicine {MedicineId} in Pharmacy {PharmacyId} at Price {Price}",
+        logger.LogInformation("Inventory {InventoryId} submitted for approval: Medicine {MedicineId}, Pharmacy {PharmacyId}, Price {Price}",
             inventory.Id, inventory.MedicineId, inventory.PharmacyId, inventory.Price);
-        
-         await hub.InventoryStatusChangedAsync(
-            new(inventory.Id, inventory.PharmacyId, inventory.MedicineId,
-                inventory.Status, inventory.Price, inventory.LastUpdatedAt), ct);
 
         return (await GetByIdAsync(inventory.Id, ct))!;
     }
@@ -97,7 +93,7 @@ public class InventoryService(PmfDbContext context,
     public Task<List<PharmacyMedicineDetail>> GetMedicineDetailsByPharmacyAsync(int pharmacyId, CancellationToken ct) =>
         context.Inventories
             .AsNoTracking()
-            .Where(i => i.PharmacyId == pharmacyId)
+            .Where(i => i.PharmacyId == pharmacyId && i.ApprovalStatus == InventoryApprovalStatus.Approved)
             .OrderBy(i => i.Medicine.GenericName)
             .Select(i => new PharmacyMedicineDetail(
                 i.Id,
@@ -119,7 +115,7 @@ public class InventoryService(PmfDbContext context,
     {
         var inventory = await context.Inventories
             .AsNoTracking()
-            .Where(i => i.MedicineId == medicineId)
+            .Where(i => i.MedicineId == medicineId && i.ApprovalStatus == InventoryApprovalStatus.Approved)
             .OrderBy(i => i.PharmacyId)
             .Select(i => new
             {
@@ -166,6 +162,7 @@ public class InventoryService(PmfDbContext context,
     {
         var inventory = await context.Inventories
             .AsNoTracking()
+            .Where(i => i.ApprovalStatus == InventoryApprovalStatus.Approved)
             .OrderBy(i => i.Medicine.GenericName)
             .ThenBy(i => i.PharmacyId)
             .Select(i => new
@@ -254,7 +251,7 @@ public class InventoryService(PmfDbContext context,
         logger.LogInformation("inventory {inventoryId} updated by user {UserId} in pharmacy {PharmacyId}",
         inventory.Id,updatedByUserId,pharmacyId);
 
-         if (inventory.Status != oldStatus)     // <-- add
+         if (inventory.Status != oldStatus)     
         {
             await hub.InventoryStatusChangedAsync(
                 new(inventory.Id, inventory.PharmacyId, inventory.MedicineId,

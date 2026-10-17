@@ -19,6 +19,7 @@ public class InventoryController(
     IInventoryService inventoryService,
     IPharmaciesService pharmaciesService,
     IMedicinesService medicinesService,
+    IInventoryReviewService reviewService,
     IAuthorizationService authorizationService) : ControllerBase
 {
     
@@ -68,18 +69,59 @@ public class InventoryController(
         return Ok(medicines);
     }
 
+    [HttpGet("submissions", Name = nameof(GetPharmacySubmissions))]
+    [ProducesResponseType(typeof(IReadOnlyList<InventorySubmissionResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("List a pharmacy's pending and rejected submissions")]
+    [EndpointDescription("Returns the stock rows this pharmacy submitted that are not live yet (Pending or Rejected, with the rejection reason). Requires active staff of this pharmacy (or an admin).")]
+    public async Task<IActionResult> GetPharmacySubmissions(int pharmacyId, CancellationToken ct)
+    {
+        var (failure, _) = await AuthorizePharmacyWriteAsync(pharmacyId, ct);
+        if (failure is not null) return failure;
+
+        return Ok(await reviewService.GetPharmacySubmissionsAsync(pharmacyId, ct));
+    }
+
     [HttpPost(Name = nameof(Create))]
     [ProducesResponseType(typeof(InventoryResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [EndpointSummary("Add a stock record for a medicine at a pharmacy")]
-    [EndpointDescription("Creates an inventory row linking the pharmacy to a medicine, with price and stock status. Returns 404 if the pharmacy or the medicine referenced by MedicineId does not exist.")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [EndpointSummary("Submit a medicine to a pharmacy's inventory for approval")]
+    [EndpointDescription("Creates a Pending inventory row linking the pharmacy to a catalogue medicine at the pharmacy's own price. It becomes visible to patients only after a PharmacyAdmin approves it. Requires active staff of this pharmacy (or an admin). Returns 404 if the pharmacy or medicine does not exist and 409 if the pharmacy already has a row for that medicine.")]
     public async Task<IActionResult> Create(int pharmacyId, InventoryRequest request, CancellationToken ct)
     {
+        var (failure, userId) = await AuthorizePharmacyWriteAsync(pharmacyId, ct);
+        if (failure is not null) return failure;
+
         var notFound = await CheckParentsExistAsync(pharmacyId, request.MedicineId, ct);
         if (notFound is not null) return notFound;
 
-        var result = await inventoryService.CreateAsync(pharmacyId, request, ct);
+        var medicine = await medicinesService.GetByIdAsync(request.MedicineId, ct);
+        if (medicine is { IsActive: false })
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Medicine unavailable",
+                Detail = "This medicine is no longer active in the catalogue.",
+                Status = StatusCodes.Status400BadRequest,
+            });
+        }
+
+        var existing = await inventoryService.GetByPharmacyAndMedicineAsync(pharmacyId, request.MedicineId, ct);
+        if (existing is not null)
+        {
+            return Conflict(new ProblemDetails
+            {
+                Title = "Medicine already in inventory",
+                Detail = "Your pharmacy already has a submission for this medicine. If it was rejected, delete it first and submit again.",
+                Status = StatusCodes.Status409Conflict,
+            });
+        }
+
+        var result = await inventoryService.CreateAsync(pharmacyId, request with { UpdatebyUserId = userId }, ct);
         return CreatedAtAction(nameof(GetInventoryById), new { pharmacyId, id = result.Id }, result);
     }
     [HttpPut("{id:int}", Name = nameof(updateInventory))]
