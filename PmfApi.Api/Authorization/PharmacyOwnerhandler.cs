@@ -14,7 +14,9 @@ public class PharmacyOwnerHandler(PmfDbContext dbContext)
         PharmacyOwnerRequirement requirement,
         Pharmacy resource)
     {
-        if (requirement.AllowSystemAdmin && context.User.IsInRole(RoleNames.SystemAdmin))
+        if (requirement.AllowPlatformAdmin
+            && (context.User.IsInRole(RoleNames.SystemAdmin)
+                || context.User.IsInRole(RoleNames.PharmacyAdmin)))
         {
             context.Succeed(requirement);
             return;
@@ -23,7 +25,6 @@ public class PharmacyOwnerHandler(PmfDbContext dbContext)
         
         if (requirement.RequireElevatedStaffRole
             && !context.User.IsInRole(RoleNames.Pharmacy)
-            && !context.User.IsInRole(RoleNames.PharmacyStaff)
             && !context.User.IsInRole(RoleNames.PharmacyAdmin))
         {
              return;

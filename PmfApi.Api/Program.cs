@@ -143,13 +143,12 @@ builder.Services.AddAuthorization(options =>
 {
    
     options.AddPolicy("PharmacyOwnerOrAdmin", policy =>
-        policy.Requirements.Add(new PharmacyOwnerRequirement(
-            allowSystemAdmin: true,
-            requiredElevatedStaffRole: true)));
- 
-    
-    options.AddPolicy("PharmacyOwner", policy =>
-        policy.Requirements.Add(new PharmacyOwnerRequirement()));
+    policy.Requirements.Add(new PharmacyOwnerRequirement(
+        allowPlatformAdmin: true,
+        requiredElevatedStaffRole: true)));
+
+   options.AddPolicy("PharmacyOwner", policy =>
+    policy.Requirements.Add(new PharmacyOwnerRequirement()));
  
    
     options.AddPolicy("DocumentReview", policy =>
