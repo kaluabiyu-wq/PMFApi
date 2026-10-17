@@ -27,7 +27,7 @@ public class MedicinesService(PmfDbContext context, ILogger<MedicinesService> lo
         {
             GenericName = request.GenericName,
             BrandName = request.BrandName,
-            RequeiresPrescription = request.RequeiresPresciption
+            RequeiresPrescription = request.RequiresPrescription
         };
         context.Medicines.Add(medicine);
         await context.SaveChangesAsync(ct);

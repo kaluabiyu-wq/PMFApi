@@ -19,8 +19,11 @@ public class InventoriesConfiguration : IEntityTypeConfiguration<Inventory>
         .HasForeignKey(i => i.MedicineId);
         b.HasOne(i => i.Pharmacy).WithMany(p => p.Inventories)
         .HasForeignKey(i => i.PharmacyId);
-     b.HasOne(i => i.User).WithMany() 
-    .HasForeignKey(i => i.UpdatebyUserId);
+        b.HasOne(i => i.User).WithMany() 
+        .HasForeignKey(i => i.UpdatebyUserId);
+       b.Property(i => i.ApprovalStatus).IsRequired().HasMaxLength(20).HasDefaultValue("Approved");
+       b.Property(i => i.RejectionReason).HasMaxLength(500);
+       b.HasIndex(i => i.ApprovalStatus);
 
     }
 }
