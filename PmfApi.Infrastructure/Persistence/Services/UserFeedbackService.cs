@@ -82,26 +82,31 @@ public class UserFeedBackService(PmfDbContext context,ILogger <UserFeedBackServi
         };
     }
 
-    public async Task<PagedResponse<PharmacyFeedbackResponse>> GetByPharmacyAsync(
+   public async Task<PagedResponse<PharmacyFeedbackResponse>> GetByPharmacyAsync(
     int pharmacyId, PagedRequest request, CancellationToken ct)
 {
+    // Anonymous type: EF can translate member access on it.
     var query =
         from f in context.UserFeedbacks.AsNoTracking()
         join i in context.Inventories.AsNoTracking() on f.InventoryId equals i.Id
         where i.PharmacyId == pharmacyId
-        select new PharmacyFeedbackResponse(
-            f.Id, f.InventoryId, i.Medicine.GenericName,
-            f.WasMedicineAvailable, f.Comments, f.SubmittedAt);
+        select new
+        {
+            f.Id,
+            f.InventoryId,
+            MedicineName = i.Medicine.GenericName,
+            f.WasMedicineAvailable,
+            f.Comments,
+            f.SubmittedAt
+        };
 
     if (!string.IsNullOrWhiteSpace(request.Search))
-    {
         query = query.Where(x => x.Comments != null
             && EF.Functions.ILike(x.Comments, $"%{request.Search}%"));
-    }
 
     var totalCount = await query.CountAsync(ct);
 
-    IOrderedQueryable<PharmacyFeedbackResponse> sorted = request.OrderBy switch
+    var sorted = request.OrderBy switch
     {
         "MedicineName" => request.Descending
             ? query.OrderByDescending(x => x.MedicineName)
@@ -117,14 +122,15 @@ public class UserFeedBackService(PmfDbContext context,ILogger <UserFeedBackServi
     var items = await sorted
         .Skip((request.Page - 1) * request.PageSize)
         .Take(request.PageSize)
+        .Select(x => new PharmacyFeedbackResponse(
+            x.Id, x.InventoryId, x.MedicineName,
+            x.WasMedicineAvailable, x.Comments, x.SubmittedAt))
         .ToListAsync(ct);
 
     return new PagedResponse<PharmacyFeedbackResponse>
     {
-        Items = items,
-        TotalCount = totalCount,
-        Page = request.Page,
-        PageSize = request.PageSize,
+        Items = items, TotalCount = totalCount,
+        Page = request.Page, PageSize = request.PageSize,
     };
 }
 
