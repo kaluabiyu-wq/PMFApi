@@ -118,7 +118,7 @@ public class PrescriptionController(
         if (entity is null) return PrescriptionNotFound(id);
 
         var isPatient = CurrentUserId == entity.Order.UserId;
-        if (!isPatient && !await CanVerifyAsync(entity)) return PrescriptionNotFound(id);
+        if (!isPatient && !await CanVerifyAsync(entity, ct)) return PrescriptionNotFound(id);
 
         return Ok(await prescriptionService.GetByIdAsync(id, ct));
     }
@@ -134,7 +134,7 @@ public class PrescriptionController(
         if (entity is null) return PrescriptionNotFound(id);
 
         var isPatient = CurrentUserId == entity.Order.UserId;
-        if (!isPatient && !await CanVerifyAsync(entity)) return PrescriptionNotFound(id);
+        if (!isPatient && !await CanVerifyAsync(entity, ct)) return PrescriptionNotFound(id);
 
         var isLink = entity.FileUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
             || entity.FileUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
@@ -195,13 +195,13 @@ public class PrescriptionController(
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     [EndpointSummary("Approve or reject a prescription")]
-    [EndpointDescription("Requires the PrescriptionVerification policy: a SystemAdmin, or an active PharmacyStaff/PharmacyAdmin of the pharmacy the prescription's order was placed with. Sets VerificationStatus to Approved or Rejected (a note is required when rejecting) and records the caller from the token as the verifier. A prescription is decided once; deciding it again, or deciding one whose order is no longer Pending, returns 409. Approval is what allows an order containing prescription-only medicine to be confirmed.")]
+    [EndpointDescription("Allowed for a SystemAdmin, an active PharmacyStaff/PharmacyAdmin of the pharmacy the prescription's order was placed with (PrescriptionVerification policy), or anyone who passes PharmacyOwnerOrAdmin for that pharmacy, such as its owner. Sets VerificationStatus to Approved or Rejected (a note is required when rejecting) and records the caller from the token as the verifier. A prescription is decided once; deciding it again, or deciding one whose order is no longer Pending, returns 409. Approval is what allows an order containing prescription-only medicine to be confirmed.")]
     public async Task<IActionResult> ReviewPrescription(int id, PrescriptionReviewRequest request, CancellationToken ct)
     {
         var entity = await prescriptionService.GetEntityByIdAsync(id, ct);
         if (entity is null) return PrescriptionNotFound(id);
 
-        if (!await CanVerifyAsync(entity))
+        if (!await CanVerifyAsync(entity, ct))
         {
             
             return CurrentUserId == entity.Order.UserId ? Forbid() : PrescriptionNotFound(id);
@@ -220,8 +220,13 @@ public class PrescriptionController(
        out var id) ? id : null;
 
    
-    private async Task<bool> CanVerifyAsync(Prescription prescription) =>
-        (await authorizationService.AuthorizeAsync(User, prescription, "PrescriptionVerification")).Succeeded;
+    // The PrescriptionVerification policy alone accepts only SystemAdmin and PharmacyStaff/PharmacyAdmin
+    // accounts, so the pharmacy owner could open the queue (PharmacyOwnerOrAdmin) but got a hidden 404
+    // on a prescription's file and on review. Anyone who can open this pharmacy's queue may now view
+    // and decide its prescriptions too.
+    private async Task<bool> CanVerifyAsync(Prescription prescription, CancellationToken ct) =>
+        (await authorizationService.AuthorizeAsync(User, prescription, "PrescriptionVerification")).Succeeded
+        || await IsPharmacyStaffAsync(prescription.Order.PharmacyId, ct);
 
     private async Task<bool> IsPharmacyStaffAsync(int pharmacyId, CancellationToken ct)
     {
