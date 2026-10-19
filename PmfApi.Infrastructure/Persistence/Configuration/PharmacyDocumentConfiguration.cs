@@ -15,6 +15,7 @@ public class PharmacyDocumentConfiguration : IEntityTypeConfiguration<PharmacyDo
 
         b.Property(d => d.DocumentType).HasConversion<string>().HasMaxLength(50);
         b.Property(d => d.ReviewStatus).HasConversion<string>().HasMaxLength(20);
+        b.Property(d => d.ReviewNote).HasMaxLength(400);
 
        
     }

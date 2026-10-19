@@ -32,6 +32,8 @@ public class PharmacyDocument
 
     public DateTime? ExpiresAt {get;set;}
 
+    public string? ReviewNote {get;set;}
+
     public Pharmacy Pharmacy {get;set;} = null!;
     public User? ReviewedByUser {get;set;}
 }

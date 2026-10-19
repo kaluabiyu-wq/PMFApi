@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "O1l6cISwW48=",
+  "dgSpecHash": "mzUAyF1ptaU=",
   "success": true,
-  "projectFilePath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\PmfApi.Api.csproj",
+  "projectFilePath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\tarik\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\tarik\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\10.0.12\\microsoft.aspnetcore.authentication.jwtbearer.10.0.12.nupkg.sha512",
@@ -48,9 +48,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
-      "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\PmfApi.Api.csproj",
+      "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\PmfApi.Api.csproj",
+      "filePath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
       "libraryId": "Microsoft.OpenApi",
       "targetGraphs": [
         "net10.0"

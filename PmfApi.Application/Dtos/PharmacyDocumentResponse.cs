@@ -10,5 +10,6 @@ public record PharmacyDocumentResponse(
     DateTime UploadedAt,
     int? ReviewedByUserId,
     ReviewStatus ReviewStatus,
-    DateTime? ExpiresAt
+    DateTime? ExpiresAt,
+    string? ReviewNote = null
 );

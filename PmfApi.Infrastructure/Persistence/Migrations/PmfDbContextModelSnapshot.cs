@@ -482,6 +482,10 @@ namespace PmfApi.Infrastructure.Persistence.Migrations
                     b.Property<int>("PharmacyId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ReviewNote")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
                     b.Property<string>("ReviewStatus")
                         .IsRequired()
                         .HasMaxLength(20)
