@@ -65,6 +65,7 @@ builder.Services.AddScoped<IDeviceTokenService,DeviceTokenService>();
 builder.Services.AddScoped<IPmfHubClient, SignalRPmfHubClient>();
 builder.Services.AddScoped<IPharmacyMembershipService, PharmacyMembershipService>();
 builder.Services.AddScoped<IPharmacyDashboardService, PharmacyDashboardService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddSignalR();
 
 

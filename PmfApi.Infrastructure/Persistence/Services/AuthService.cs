@@ -25,7 +25,8 @@ public class AuthService(
     {
         var user = await userService.GetUserEntityByEmailAsync(request.Email, ct);
 
-        if (user is null)
+        // A deactivated (deleted) account behaves exactly like an unknown email.
+        if (user is null || !user.IsActive)
         {
            
             passwordHasher.VerifyHashedPassword(DummyUserForTiming, DummyPasswordHash, request.Password);
