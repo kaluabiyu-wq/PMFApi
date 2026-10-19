@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PmfApi.Infrastructure.Persistence;
 using PmfApi.Application.Dtos;
+using PmfApi.Application.Exceptions;
 using PmfApi.Domain.Entities;
 using PmfApi.Application.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -134,7 +135,14 @@ public class PharmacyAdminService(PmfDbContext context, ILogger<PharmacyAdminSer
             pharmacy.Name = request.Name.Trim();
  
         if (!string.IsNullOrWhiteSpace(request.LicenseNumber))
-            pharmacy.LicenceNumber = request.LicenseNumber.Trim();
+        {
+            var licence = request.LicenseNumber.Trim();
+            if (licence != pharmacy.LicenceNumber
+                && await context.Pharmacies.AnyAsync(p => p.Id != pharmacyId && p.LicenceNumber == licence, ct))
+                throw new DuplicateLicenseException();
+
+            pharmacy.LicenceNumber = licence;
+        }
  
         if (request.LocationId is not null)
             pharmacy.LocationId = request.LocationId.Value;
