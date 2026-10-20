@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using PmfApi.Application.Abstractions;
 using PmfApi.Application.Dtos;
 using PmfApi.Application.Exceptions;
 using PmfApi.Application.Interfaces;
@@ -11,6 +13,7 @@ namespace PmfApi.Infrastructure.Persistence.Services;
 public class AccountService(
     PmfDbContext context,
     IPasswordHasher<User> hasher,
+    IMemoryCache cache,
     ILogger<AccountService> logger) : IAccountService
 {
     public Task<AccountResponse?> GetAsync(int userId, CancellationToken ct) =>
@@ -77,17 +80,20 @@ public class AccountService(
         if (hasher.VerifyHashedPassword(user, user.Password, password) == PasswordVerificationResult.Failed)
             return AccountDeleteOutcome.WrongPassword;
 
+        // A pharmacy may be preparing an order for this person; don't leave it dangling.
         if (await context.Orders.AnyAsync(o => o.UserId == userId
                 && (o.Status == OrderStatus.Pending || o.Status == OrderStatus.Confirmed), ct))
             return AccountDeleteOutcome.HasOpenOrders;
 
-    
+        // Soft delete keeps orders, reviews and prescriptions that other people's records point at.
         user.IsActive = false;
 
-         var tokens = await context.DeviceTokens.Where(d => d.UserId == userId).ToListAsync(ct);
+        // Stop pushing notifications to a closed account's devices.
+        var tokens = await context.DeviceTokens.Where(d => d.UserId == userId).ToListAsync(ct);
         context.DeviceTokens.RemoveRange(tokens);
 
         await context.SaveChangesAsync(ct);
+        cache.Remove(UserCacheKeys.CanUseApi(userId));
 
         logger.LogInformation("User {UserId} deactivated their account", userId);
         return AccountDeleteOutcome.Deleted;

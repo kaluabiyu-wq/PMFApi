@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using PmfApi.Infrastructure.Persistence;
 using PmfApi.Application.Dtos;
@@ -60,7 +59,7 @@ public async Task<PagedResponse<UserResponse>> GetUserAsync(PagedRequest request
 
     if (!string.IsNullOrWhiteSpace(request.Search))
     {
-        query = query.Where(u => EF.Functions.ILike(u.FullName, "$%{request.Search}%")
+        query = query.Where(u => EF.Functions.ILike(u.FullName, $"%{request.Search}%")
                                || EF.Functions.ILike(u.Email, $"%{request.Search}%"));
     }
 

@@ -1,5 +1,3 @@
-
-
 using Microsoft.EntityFrameworkCore;
 using PmfApi.Domain.Entities;
 
@@ -41,6 +39,7 @@ public class PmfDbContext (DbContextOptions<PmfDbContext> options) :
 
     public DbSet<Alert> Alerts => Set<Alert>();
     public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
 
      protected override void OnModelCreating(ModelBuilder b)

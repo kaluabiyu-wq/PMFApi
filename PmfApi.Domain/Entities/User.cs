@@ -14,6 +14,18 @@ public class User
 
     public DateTime CreatedAt {get;set;} = DateTime.UtcNow;
 
+    public DateTime? LastLoginAt {get;set;}
+
+    public DateTime? SuspendedAt {get;set;}
+    public string? SuspensionReason {get;set;}
+
+    
+    public DateTime? DeletedAt {get;set;}
+
+    
+    public string? PasswordResetTokenHash {get;set;}
+    public DateTime? PasswordResetExpiresAt {get;set;}
+
     public  required int RoleId {get;set;}
     public int LocationId {get;set;}
 

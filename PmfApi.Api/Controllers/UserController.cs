@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PmfApi.Application.Dtos;
 using PmfApi.Application.Interfaces;
@@ -13,6 +14,7 @@ namespace PmfApi.Api.Controllers;
 public class UserController(IUserService userService) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Roles = "SysAdmin")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [EndpointSummary("Register a user")]
@@ -24,6 +26,8 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpGet("{email}", Name = nameof(GetByEmail))]
+    // Pharmacies look staff up by email when adding them, so they keep read access; anonymous callers do not.
+    [Authorize(Roles = "SysAdmin,PharmacyAdmin,Pharmacy")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [EndpointSummary("Get a user by email")]
@@ -35,6 +39,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "SysAdmin")]
     [ProducesResponseType(typeof(PagedResponse<UserResponse>), StatusCodes.Status200OK)]
     [EndpointSummary("List users with pagination")]
     [EndpointDescription("Returns a paginated list of users. PageSize is capped by PagedRequest.")]

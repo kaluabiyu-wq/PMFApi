@@ -1,5 +1,3 @@
-
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PmfApi.Domain.Entities;
@@ -18,6 +16,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         b.Property(u=> u.Email).HasMaxLength(200);
         b.Property(u=> u.Password).HasMaxLength(200);
         b.HasIndex(u=>u.Email).IsUnique();
+        b.Property(u=> u.SuspensionReason).HasMaxLength(300);
+        b.Property(u=> u.PasswordResetTokenHash).HasMaxLength(100);
         
     }
 }

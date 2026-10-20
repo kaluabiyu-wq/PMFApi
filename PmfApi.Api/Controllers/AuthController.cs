@@ -15,8 +15,9 @@ namespace PmfApi.Api.Controllers;
 [Produces("application/json")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
 public class AuthController(IAuthService authService
-, IPharmacyRegistrationService registrationService,PmfDbContext context) : ControllerBase
-{
+, IPharmacyRegistrationService registrationService,PmfDbContext context,
+IUserService userService, IAccountRecoveryService recoveryService) : ControllerBase
+ {
     [HttpPost("login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
@@ -26,7 +27,22 @@ public class AuthController(IAuthService authService
         "and their role name as a Role claim.")]
     public async Task<IActionResult> LoginAsync(LoginRequest request, CancellationToken ct)
     {
-        var result = await authService.LoginAsync(request, ct);
+        LoginResponse? result;
+        try
+        {
+            result = await authService.LoginAsync(request, ct);
+        }
+        catch (AccountSuspendedException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new ProblemDetails
+            {
+                Title = "Account suspended",
+                Status = StatusCodes.Status403Forbidden,
+                Detail = string.IsNullOrWhiteSpace(ex.Message)
+                    ? "This account is suspended. Contact an administrator."
+                    : $"This account is suspended: {ex.Message}",
+            });
+        }
 
         if (result is null)
         {
@@ -40,6 +56,65 @@ public class AuthController(IAuthService authService
         }
 
         return Ok(result);
+    }
+
+    [HttpPost("register-patient")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [EndpointSummary("Sign up as a patient")]
+    [EndpointDescription("Public sign-up. The role is always Patient, whatever the caller sends, so nobody can create a privileged account here.")]
+    public async Task<IActionResult> RegisterPatient(RegisterPatientRequest request, CancellationToken ct)
+    {
+        var roleId = await context.Roles.Where(r => r.Name == "Patient").Select(r => r.Id).FirstOrDefaultAsync(ct);
+        if (roleId == 0)
+            return Problem(title: "Patient role is missing", statusCode: StatusCodes.Status500InternalServerError);
+
+        var email = request.Email.Trim();
+        if (await context.Users.AnyAsync(u => u.Email == email, ct))
+            return Conflict(new ProblemDetails { Title = "Email already registered", Status = StatusCodes.Status409Conflict });
+
+        if (!await context.Locations.AnyAsync(l => l.Id == request.LocationId, ct))
+            return BadRequest(new ProblemDetails { Title = "Unknown LocationId", Status = StatusCodes.Status400BadRequest });
+
+        await userService.CreateAsync(new UserRequest
+        {
+            FullName = request.FullName.Trim(),
+            Email = email,
+            Password = request.Password,
+            LocationId = request.LocationId,
+            RoleId = roleId,
+        }, ct);
+
+        return StatusCode(StatusCodes.Status201Created);
+    }
+
+    [HttpPost("forgot-password")]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
+    [EndpointSummary("Request a password-reset email")]
+    [EndpointDescription("Always answers 202, whether or not the email belongs to an account, so it cannot be used to discover who is registered.")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request, CancellationToken ct)
+    {
+        await recoveryService.RequestResetAsync(request.Email, ct);
+        return Accepted();
+    }
+
+    [HttpPost("reset-password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Choose a new password with an emailed link")]
+    [EndpointDescription("Needs the email and token from the reset link. A token works once and expires after one hour.")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken ct)
+    {
+        var ok = await recoveryService.ResetAsync(request.Email, request.Token, request.NewPassword, ct);
+        return ok
+            ? NoContent()
+            : BadRequest(new ProblemDetails
+            {
+                Title = "Reset link invalid or expired",
+                Detail = "Ask for a new password-reset email and try again.",
+                Status = StatusCodes.Status400BadRequest,
+            });
     }
 
  [HttpPost("register-pharmacy")]
@@ -103,4 +178,3 @@ public async Task<ActionResult<UserProfileDto>> Me(CancellationToken ct)
 }
 
 public record UserProfileDto(string FullName, int? LocationId, string? LocationLabel,int? PharmacyId);
-

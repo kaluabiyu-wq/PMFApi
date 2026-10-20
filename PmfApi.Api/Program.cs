@@ -1,5 +1,3 @@
-
-
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -18,6 +16,8 @@ using PmfApi.Application.Abstractions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Security.Claims;
+using Microsoft.Extensions.Caching.Memory;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,6 +42,10 @@ builder.Services.AddScoped<IInventoryHistoryService,InventoryHistoryService>();
 builder.Services.AddScoped<IInventoryReviewService, InventoryReviewService>();
 builder.Services.AddScoped<IUserFeedBackService,UserFeedBackService>();
 builder.Services.AddScoped<IUserService,UserService>();
+builder.Services.AddScoped<IAdminService,AdminService>();
+builder.Services.AddScoped<IAccountRecoveryService,AccountRecoveryService>();
+builder.Services.AddSingleton<IEmailSender,SmtpEmailSender>();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IRoleService,RoleService>();
 builder.Services.AddScoped<ISearchService,SearchService>();
 builder.Services.AddScoped<IPharmacyStaffService,PharmacyStaffService>();
@@ -137,6 +141,30 @@ builder.Services
                     ctx.Token = token;
                 }
                 return Task.CompletedTask;
+            },
+
+            // A valid signature is not enough: a suspended, deactivated or deleted account must stop
+            // working at once, not when its token expires. The answer is cached for 15 seconds, and
+            // the admin and self-delete code clear the cache entry so the change is immediate.
+            OnTokenValidated = async ctx =>
+            {
+                if (!int.TryParse(ctx.Principal?.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+                {
+                    ctx.Fail("Invalid token.");
+                    return;
+                }
+
+                var cache = ctx.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
+                if (!cache.TryGetValue(UserCacheKeys.CanUseApi(userId), out bool canUse))
+                {
+                    var db = ctx.HttpContext.RequestServices.GetRequiredService<PmfDbContext>();
+                    canUse = await db.Users.AsNoTracking().AnyAsync(
+                        u => u.Id == userId && u.IsActive && u.SuspendedAt == null && u.DeletedAt == null,
+                        ctx.HttpContext.RequestAborted);
+                    cache.Set(UserCacheKeys.CanUseApi(userId), canUse, TimeSpan.FromSeconds(15));
+                }
+
+                if (!canUse) ctx.Fail("This account is no longer active.");
             }
         };
     });
