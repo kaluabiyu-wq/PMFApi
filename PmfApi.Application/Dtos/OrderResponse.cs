@@ -12,6 +12,7 @@ public record OrderItemResponse(
    int MedicineId,
    string GenericName,
    string BrandName,
+   string PharmacyName,
    int Quantity,
    decimal UnitPrice,
    decimal LineTotal

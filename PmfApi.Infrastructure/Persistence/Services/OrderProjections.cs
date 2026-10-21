@@ -22,6 +22,7 @@ internal static class OrderProjections
             i.Inventory.MedicineId,
             i.Inventory.Medicine.GenericName,
             i.Inventory.Medicine.BrandName,
+            i.Inventory.Pharmacy.Name,
             i.Quantity,
             i.UnitPrice,
             i.Quantity * i.UnitPrice
