@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PmfApi.Application.Interfaces;
 using PmfApi.Application.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PmfApi.Api.Controllers;
 
@@ -11,8 +12,40 @@ namespace PmfApi.Api.Controllers;
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
 public class InventoryHistoryController(
     IInventoryHistoryService inventoryHistoryService,
-    IInventoryService inventoryService) : ControllerBase
+    IInventoryService inventoryService,
+    IPharmaciesService pharmaciesService,
+    IAuthorizationService authorizationService) : ControllerBase
 {
+    [HttpGet(Name = nameof(GetInventoryPriceChanges))]
+    [ProducesResponseType(typeof(PagedResponse<InventoryPriceChangeResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [EndpointSummary("List the price history of an inventory row")]
+    [EndpointDescription("Returns a page of price changes for the inventory row, newest first, each with the old price, the price it became, who changed it and when. Requires active staff of the owning pharmacy (or an admin). Returns 404 if the inventory row does not exist.")]
+    public async Task<IActionResult> GetInventoryPriceChanges(
+        int inventoryId, [FromQuery] PagedRequest request, CancellationToken ct)
+    {
+        var inventory = await inventoryService.GetByIdAsync(inventoryId, ct);
+        if (inventory is null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Title = "Inventory record not found",
+                Detail = $"No inventory record exists with id {inventoryId}.",
+                Status = StatusCodes.Status404NotFound,
+            });
+        }
+
+        // Authorize against the pharmacy that OWNS this row, not against anything the client sends.
+        var pharmacy = await pharmaciesService.GetEntityByIdAsync(inventory.PharmacyId, ct);
+        if (pharmacy is null) return NotFound();
+
+        var auth = await authorizationService.AuthorizeAsync(User, pharmacy, "PharmacyOwnerOrAdmin");
+        if (!auth.Succeeded) return Forbid();
+
+        return Ok(await inventoryHistoryService.GetPriceChangesAsync(inventoryId, request, ct));
+    }
+
     [HttpGet("{id:int}", Name = nameof(GetInventoryHistoryById))]
     [ProducesResponseType(typeof(InventoryHistoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]

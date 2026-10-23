@@ -8,7 +8,7 @@ public interface IInventoryHistoryService
 {
 Task<InventoryHistoryResponse> CreateAsync(int InventoryId,InventoryHistoryRequest request,CancellationToken ct);
 Task<InventoryHistoryResponse?> GetByinventoryIdAsync(int InventoryId,int id,CancellationToken ct);
-
+Task<PagedResponse<InventoryPriceChangeResponse>> GetPriceChangesAsync(int inventoryId, PagedRequest request, CancellationToken ct);
  
 }
 
