@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\PmfApi.Api.csproj": {}
+    "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\PmfApi.Api.csproj": {
+    "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\PmfApi.Api.csproj",
+        "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
         "projectName": "PmfApi.Api",
-        "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\PmfApi.Api.csproj",
+        "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
         "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\obj\\",
+        "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"

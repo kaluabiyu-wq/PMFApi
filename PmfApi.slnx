@@ -3,5 +3,6 @@
   <Project Path="PmfApi.Application/PmfApi.Application.csproj" />
   <Project Path="PmfApi.Domain/PmfApi.Domain.csproj" />
   <Project Path="PmfApi.Infrastructure/PmfApi.Infrastructure.csproj" />
+  <Project Path="PmfApi.Tests/PmfApi.Tests.csproj" />
 </Solution>
 

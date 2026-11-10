@@ -2688,11 +2688,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\PmfApi.Api.csproj",
+      "projectUniqueName": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
       "projectName": "PmfApi.Api",
-      "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\PmfApi.Api.csproj",
+      "projectPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\PmfApi.Api.csproj",
       "packagesPath": "C:\\Users\\tarik\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\pmfApi.Api\\obj\\",
+      "outputPath": "C:\\Users\\tarik\\Desktop\\Qiyas\\PMFApi\\PmfApi.Api\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\tarik\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -3195,10 +3195,14 @@
   },
   "logs": [
     {
-      "code": "NU1900",
+      "code": "NU1903",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json."
+      "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
+      "libraryId": "Microsoft.OpenApi",
+      "targetGraphs": [
+        "net10.0"
+      ]
     }
   ]
 }
