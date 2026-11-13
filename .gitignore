@@ -4,3 +4,7 @@ obj/
 *.user
 *.suo
 PmfApi.Api/uploads/
+
+appsettings.Development.json
+.env
+*.env
