@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+**/.vs/
+.git/
+PmfApi.Api/uploads/
+**/appsettings.Development.json
+PmfApi.Tests/

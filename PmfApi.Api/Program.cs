@@ -27,11 +27,16 @@ builder.Services
 .AddAuthentication("Pharmacy")
 .AddScheme<AuthenticationSchemeOptions, PharmacyAuthHandler>("Pharmacy",null);
 
-builder.Services.AddDbContext<PmfDbContext>(options => options.UseNpgsql(
-    builder.Configuration.GetConnectionString("PmfDatabase"))
-.LogTo(Console.WriteLine, LogLevel.Information)
-.EnableSensitiveDataLogging()
-);
+builder.Services.AddDbContext<PmfDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PmfDatabase"));
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.LogTo(Console.WriteLine, LogLevel.Information)
+               .EnableSensitiveDataLogging();
+    }
+});
 
 builder.Services.AddScoped<IPharmaciesService,PharamaciesSerivce>();
 builder.Services.AddScoped<IMedicinesService,MedicinesService>();
@@ -58,7 +63,10 @@ builder.Services.AddScoped<IAuthService,AuthService>();
 builder.Services.AddScoped<ITokenService,TokenService>();
 builder.Services.AddScoped<IAuthorizationHandler, PharmacyOwnerHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, PharmacyDocumentReviewHandler>();
-builder.Services.AddScoped<IFileStorage,LocalFileStorage>();
+if (!string.IsNullOrWhiteSpace(builder.Configuration["Supabase:Url"]))
+    builder.Services.AddHttpClient<IFileStorage, SupabaseFileStorage>();
+else
+    builder.Services.AddScoped<IFileStorage, LocalFileStorage>();
 builder.Services.AddScoped<IPharmacyRegistrationService,PharmacyRegistrationService>();
 builder.Services.AddScoped<IOrderService,OrderService>();
 builder.Services.AddScoped<IOrderItemService,OrderItemService>();
@@ -75,11 +83,13 @@ builder.Services.AddSignalR();
 
 
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:Origins").Get<string[]>() ?? ["http://localhost:4200"];
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials());
@@ -235,12 +245,15 @@ app.MapHub<PmfHub>("/hubs/pmf");
 
 
 
-if (app.Environment.IsDevelopment()) { 
-    using var scope = app.Services.CreateScope(); 
-    var context = scope.ServiceProvider.GetRequiredService<PmfDbContext>(); 
-    await DataSeeder.SeedAsync(context);
-     }
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<PmfDbContext>();
 
+    if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Seed:RunOnStartup"))
+        await DataSeeder.SeedAsync(context);
+    else if (app.Environment.IsProduction())
+        await context.Database.MigrateAsync();
+}
 
 app.MapGet("/api/error", () =>
 {
